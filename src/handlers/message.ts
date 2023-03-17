@@ -52,7 +52,7 @@ class MessageHandler {
       // - direct messages in private chats
       // - replied messages in both private chats and group chats
       // - messages that start with `chatCmd` in private chats and group chats
-      await this._chatHandler.handle(msg, text);
+      await this._chatHandler.handle(msg, text, isMentioned, this._botUsername);
     }
   };
 
@@ -60,16 +60,47 @@ class MessageHandler {
     let text = msg.text ?? '';
     let command = '';
     let isMentioned = false;
+    console.log(msg)
     if ('entities' in msg) {
       // May have bot commands.
       const regMention = new RegExp(`@${this._botUsername}$`);
       for (const entity of msg.entities ?? []) {
-        if (entity.type == 'bot_command' && entity.offset == 0) {
-          text = msg.text?.slice(entity.length).trim() ?? '';
-          command = msg.text?.slice(0, entity.length) ?? '';
-          isMentioned = regMention.test(command);
-          command = command.replace(regMention, ''); // Remove the mention.
-          break;
+        switch (entity.type) {
+          case 'bot_command':
+            if (entity.offset == 0) {
+              text = msg.text?.slice(entity.length).trim() ?? '';
+              command = msg.text?.slice(0, entity.length) ?? '';
+              isMentioned = regMention.test(command);
+              command = command.replace(regMention, ''); // Remove the mention.
+            }
+            break;
+          // Add other entity.type cases here
+          case 'mention':
+            // Handle mention entity type
+            isMentioned = true
+            if (msg.text) {
+              const { offset, length } = entity;   
+              text = msg.text;
+              text = (text.slice(0, offset) + text.slice(offset + length)).trim();
+            } else {
+              text = ''
+            }
+            break;
+
+          case 'hashtag':
+            // Handle hashtag entity type
+            break;
+
+          case 'url':
+            // Handle url entity type
+            break;
+
+          // Add more cases for other entity types if needed
+
+          // ...
+
+          default:
+            break;
         }
       }
     }
@@ -78,3 +109,4 @@ class MessageHandler {
 }
 
 export {MessageHandler};
+

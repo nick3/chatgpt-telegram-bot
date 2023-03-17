@@ -42,7 +42,7 @@ class CommandHandler {
           msg.chat.id,
           '与我聊天，您可以：\n' +
             '  • 直接发送消息（群组中不支持）📩\n' +
-            `  • 发送以 ${this._opts.chatCmd} 开头的消息\n` +
+            `  • 在群组中 @${botUsername} 并发送消息\n` +
             '  • 回复我的上一条消息💬\n\n' +
             '命令列表：\n' +
             `(在群组中使用命令时，请确保在命令后加上提及，例如 /help@${botUsername}）。\n` +
@@ -66,7 +66,7 @@ class CommandHandler {
         if (this._opts.userIds.indexOf(msg.from?.id ?? 0) == -1) {
           await this._bot.sendMessage(
             msg.chat.id,
-            '⛔️ Sorry, you do not have the permission to run this command.'
+            '⛔️ 抱歉，您没有权限执行此命令。'
           );
           logWithTime(
             `⚠️ Permission denied for "${command}" from ${userInfo}.`
@@ -74,15 +74,15 @@ class CommandHandler {
         } else {
           await this._bot.sendChatAction(msg.chat.id, 'typing');
           await this._api.refreshSession();
-          await this._bot.sendMessage(msg.chat.id, '🔄 Session refreshed.');
+          await this._bot.sendMessage(msg.chat.id, '🔄 会话已刷新。');
           logWithTime(`🔄 Session refreshed by ${userInfo}.`);
         }
         break;
-
+        
       default:
         await this._bot.sendMessage(
           msg.chat.id,
-          '⚠️ Unsupported command. Run /help to see the usage.'
+          '⚠️ 不支持的命令。运行 /help 查看使用方法。'
         );
         break;
     }

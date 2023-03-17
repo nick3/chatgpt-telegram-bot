@@ -26,7 +26,7 @@ class ChatHandler {
     this._opts = botOpts;
   }
 
-  handle = async (msg: TelegramBot.Message, text: string) => {
+  handle = async (msg: TelegramBot.Message, text: string, isMentioned: boolean, botUsername: string) => {
     if (!text) return;
 
     const chatId = msg.chat.id;
@@ -39,28 +39,33 @@ class ChatHandler {
       logWithTime(`📩 Message from ${userInfo} in ${chatInfo}:\n${text}`);
     }
 
-    // Send a message to the chat acknowledging receipt of their message
-    const reply = await this._bot.sendMessage(chatId, '⌛', {
-      reply_to_message_id: msg.message_id,
-    });
+    // Check if the message is a reply to the bot's message
+    const isReplyToBot = msg.reply_to_message?.from?.username === botUsername;
 
-    // add to sequence queue due to chatGPT processes only one request at a time
-    const requestPromise = this._apiRequestsQueue.add(() => {
-      return this._sendToGpt(text, chatId, reply);
-    });
-    if (this._n_pending == 0) this._n_pending++;
-    else this._n_queued++;
-    this._positionInQueue[this._getQueueKey(chatId, reply.message_id)] =
-      this._n_queued;
+    if (msg.chat.type === 'private' || ((msg.chat.type === 'group' || msg.chat.type === 'supergroup') && (isMentioned || isReplyToBot))) {
+      // Send a message to the chat acknowledging receipt of their message
+      const reply = await this._bot.sendMessage(chatId, '⌛', {
+        reply_to_message_id: msg.message_id,
+      });
 
-    await this._bot.editMessageText(
-      this._n_queued > 0 ? `⌛: 您现在排在第${this._n_queued}位，稍安勿躁哦~` : '🤔',
-      {
-        chat_id: chatId,
-        message_id: reply.message_id,
-      }
-    );
-    await requestPromise;
+      // add to sequence queue due to chatGPT processes only one request at a time
+      const requestPromise = this._apiRequestsQueue.add(() => {
+        return this._sendToGpt(text, chatId, reply);
+      });
+      if (this._n_pending == 0) this._n_pending++;
+      else this._n_queued++;
+      this._positionInQueue[this._getQueueKey(chatId, reply.message_id)] =
+        this._n_queued;
+
+      await this._bot.editMessageText(
+        this._n_queued > 0 ? `⌛: 您现在排在第${this._n_queued}位，稍安勿躁哦~` : '🤔',
+        {
+          chat_id: chatId,
+          message_id: reply.message_id,
+        }
+      );
+      await requestPromise;
+    }
   };
 
   protected _sendToGpt = async (
