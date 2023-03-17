@@ -54,7 +54,7 @@ class ChatHandler {
       this._n_queued;
 
     await this._bot.editMessageText(
-      this._n_queued > 0 ? `⌛: You are #${this._n_queued} in line.` : '🤔',
+      this._n_queued > 0 ? `⌛: 您现在排在第${this._n_queued}位，稍安勿躁哦~` : '🤔',
       {
         chat_id: chatId,
         message_id: reply.message_id,
