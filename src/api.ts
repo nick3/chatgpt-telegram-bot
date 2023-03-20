@@ -138,6 +138,7 @@ class ChatGPT {
       } catch (err) {
         console.error(err);
         this.resetThread();
+        return;
       }
     } else {
       res = await this._api.sendMessage(text, {
