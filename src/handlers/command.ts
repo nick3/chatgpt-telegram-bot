@@ -78,7 +78,45 @@ class CommandHandler {
           logWithTime(`🔄 Session refreshed by ${userInfo}.`);
         }
         break;
-        
+      case '/mode':
+        const options = {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: 'ChatGPT',
+                  callback_data: 'chatgpt',
+                },
+                {
+                  text: 'Bing AI',
+                  callback_data: 'bing',
+                },
+              ],
+            ],
+          },
+        };
+        this._bot.sendMessage(
+          msg.chat.id,
+          '请选择您想要使用的AI引擎：',
+          options
+        ).then(() => {
+          this._bot.on('callback_query', async (callbackQuery) => {
+            if (callbackQuery.data === 'chatgpt') {
+              await this._api.changeAPIType('official');
+              await this._bot.sendMessage(
+                msg.chat.id,
+                '已切换至ChatGPT引擎。'
+              );
+            } else if (callbackQuery.data === 'bing') {
+              await this._api.changeAPIType('bing');
+              await this._bot.sendMessage(
+                msg.chat.id,
+                '已切换至Bing AI引擎。'
+              );
+            }
+          });
+        });
+        break;
       default:
         await this._bot.sendMessage(
           msg.chat.id,

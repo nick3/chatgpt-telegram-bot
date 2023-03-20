@@ -7,39 +7,62 @@ import type {
   ChatGPTAPIBrowser,
   ChatResponse as ChatResponseV3,
 } from 'chatgpt-v3';
+import type {
+  BingResponse
+} from '@waylaidwanderer/chatgpt-api'
+import { BingAIClient } from '@waylaidwanderer/chatgpt-api'
 import {
   APIBrowserOptions,
   APIOfficialOptions,
+  APIBingOptions,
   APIOptions,
   APIUnofficialOptions,
 } from './types';
 import {logWithTime} from './utils';
+import { KeyvFile } from 'keyv-file';
 
 interface ChatContext {
+  jailbreakConversationId?: string;
   conversationId?: string;
   parentMessageId?: string;
 }
 
 class ChatGPT {
   debug: number;
-  readonly apiType: string;
+  protected apiType: string;
   protected _opts: APIOptions;
   protected _api:
     | ChatGPTAPI
     | ChatGPTAPIBrowser
     | ChatGPTUnofficialProxyAPI
+    | BingAIClient
     | undefined;
   protected _apiBrowser: ChatGPTAPIBrowser | undefined;
   protected _apiOfficial: ChatGPTAPI | undefined;
   protected _apiUnofficialProxy: ChatGPTUnofficialProxyAPI | undefined;
   protected _context: ChatContext = {};
   protected _timeoutMs: number | undefined;
+  protected _cacheOptions: object;
 
   constructor(apiOpts: APIOptions, debug = 1) {
     this.debug = debug;
     this.apiType = apiOpts.type;
     this._opts = apiOpts;
     this._timeoutMs = undefined;
+    this._cacheOptions = {
+      // Options for the Keyv cache, see https://www.npmjs.com/package/keyv
+      // This is used for storing conversations, and supports additional drivers (conversations are stored in memory by default)
+      // For example, to use a JSON file (`npm i keyv-file`) as a database:
+      // store: new KeyvFile({ filename: 'cache.json' }),
+      store: new KeyvFile({
+        filename: 'cache.json',
+        expiredCheckDelay: 24 * 3600 * 1000,
+        writeDelay: 1000,
+        encode: JSON.stringify, // serialize function
+        decode: JSON.parse // deserialize function
+      }),
+      namespace: 'bing',
+    };
   }
 
   init = async () => {
@@ -65,23 +88,49 @@ class ChatGPT {
       );
       this._api = this._apiUnofficialProxy;
       this._timeoutMs = this._opts.unofficial?.timeoutMs;
+    } else if (this._opts.type == 'bing') {
+      console.log('this._opts.bing', this._opts.bing);
+      this._api = new BingAIClient({
+        ...(this._opts.bing as APIBingOptions),
+        cache: this._cacheOptions,
+       });
+      this._timeoutMs = this._opts.browser?.timeoutMs;
     } else {
       throw new RangeError('Invalid API type');
     }
     logWithTime('🔮 ChatGPT API has started...');
   };
 
+  getApiType = () => {
+      return this.apiType;
+  };
+
+  changeAPIType = async (type: 'browser' | 'official' | 'unofficial' | 'bing') => {
+    this.apiType = type
+    this._opts.type = type;
+    await this.init();
+  };
+  
   sendMessage = async (
     text: string,
-    onProgress?: (res: ChatResponseV3 | ChatResponseV4) => void
+    onProgress?: (res: ChatResponseV3 | ChatResponseV4 | BingResponse) => void
   ) => {
     if (!this._api) return;
 
-    let res: ChatResponseV3 | ChatResponseV4;
+    let res: ChatResponseV3 | ChatResponseV4 | BingResponse;
     if (this.apiType == 'official') {
       if (!this._apiOfficial) return;
       res = await this._apiOfficial.sendMessage(text, {
         ...this._context,
+        onProgress,
+        timeoutMs: this._timeoutMs,
+      });
+    } else if (this.apiType == 'bing') {
+      if (!this._api) return;
+      res = await this._api.sendMessage(text, {
+        jailbreakConversationId: true,
+        ...this._context,
+        toneStyle: 'creative',
         onProgress,
         timeoutMs: this._timeoutMs,
       });
@@ -93,12 +142,21 @@ class ChatGPT {
       });
     }
 
-    const parentMessageId =
-      this.apiType == 'browser'
-        ? (res as ChatResponseV3).messageId
-        : (res as ChatResponseV4).id;
-
+    let parentMessageId;
+    switch (this.apiType) {
+      case 'browser':
+        parentMessageId = (res as ChatResponseV3).messageId;
+        break;
+      case 'bing':
+        parentMessageId = (res as BingResponse).messageId;
+        break;
+      default:
+        parentMessageId = (res as ChatResponseV4).id;
+        break;
+    }
+    
     this._context = {
+      jailbreakConversationId: (res as BingResponse).jailbreakConversationId as string,
       conversationId: res.conversationId,
       parentMessageId: parentMessageId,
     };

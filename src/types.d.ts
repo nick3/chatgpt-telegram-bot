@@ -44,11 +44,19 @@ export interface APIUnofficialOptions {
   debug?: boolean;
 }
 
+export interface APIBingOptions {
+  host?: string;
+  userToken: string;
+  cookies?: string;
+  proxy?: string;
+}
+
 export interface APIOptions {
-  type: 'browser' | 'official' | 'unofficial';
+  type: 'browser' | 'official' | 'unofficial' | 'bing';
   browser?: APIBrowserOptions;
   official?: APIOfficialOptions;
   unofficial?: APIUnofficialOptions;
+  bing?: APIBingOptions;
 }
 
 export interface Config {
@@ -57,3 +65,4 @@ export interface Config {
   api: APIOptions;
   proxy?: string;
 }
+

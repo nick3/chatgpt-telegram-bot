@@ -1,5 +1,6 @@
 import type {ChatMessage as ChatResponseV4} from 'chatgpt';
 import type {ChatResponse as ChatResponseV3} from 'chatgpt-v3';
+import type {InMemoryDatabase} from '../db';
 import _ from 'lodash';
 import type TelegramBot from 'node-telegram-bot-api';
 import telegramifyMarkdown from 'telegramify-markdown';
@@ -7,6 +8,7 @@ import type {ChatGPT} from '../api';
 import {BotOptions} from '../types';
 import {logWithTime} from '../utils';
 import Queue from 'promise-queue';
+import { BingResponse, SourceAttributions } from '@waylaidwanderer/chatgpt-api';
 
 class ChatHandler {
   debug: number;
@@ -26,7 +28,7 @@ class ChatHandler {
     this._opts = botOpts;
   }
 
-  handle = async (msg: TelegramBot.Message, text: string, isMentioned: boolean, botUsername: string) => {
+  handle = async (db: InMemoryDatabase, msg: TelegramBot.Message, text: string, isMentioned: boolean, botUsername: string) => {
     if (!text) return;
 
     const chatId = msg.chat.id;
@@ -39,9 +41,11 @@ class ChatHandler {
       logWithTime(`📩 Message from ${userInfo} in ${chatInfo}:\n${text}`);
     }
 
+    db.addChatRecord(`${chatId}`, msg.from?.username ?? '', text);
+
     // Check if the message is a reply to the bot's message
     const isReplyToBot = msg.reply_to_message?.from?.username === botUsername;
-
+  
     if (msg.chat.type === 'private' || ((msg.chat.type === 'group' || msg.chat.type === 'supergroup') && (isMentioned || isReplyToBot))) {
       // Send a message to the chat acknowledging receipt of their message
       const reply = await this._bot.sendMessage(chatId, '⌛', {
@@ -78,33 +82,55 @@ class ChatHandler {
 
     // Send message to ChatGPT
     try {
-      const res = await this._api.sendMessage(
-        text,
-        _.throttle(
-          async (partialResponse: ChatResponseV3 | ChatResponseV4) => {
-            const resText =
-              this._api.apiType == 'browser'
-                ? (partialResponse as ChatResponseV3).response
-                : (partialResponse as ChatResponseV4).text;
+      let res;
+      let resText = '';
+      const apiType = this._api.getApiType();
+      if (apiType === 'bing') {
+        const throt_fun = _.throttle(
+          async () => {
             reply = await this._editMessage(reply, resText);
             await this._bot.sendChatAction(chatId, 'typing');
           },
-          3000,
+          3000, 
           {leading: true, trailing: false}
+        );
+        res = await this._api.sendMessage(
+          text,
+          (token) => {
+            resText += token;
+            throt_fun()
+          }
         )
-      );
-      const resText =
-        this._api.apiType == 'browser'
-          ? (res as ChatResponseV3).response
-          : (res as ChatResponseV4).text;
-      await this._editMessage(reply, resText);
+        await this._editMessage(reply, resText, true, (res as BingResponse).details?.sourceAttributions);
+      } else {
+        res = await this._api.sendMessage(
+          text,
+          _.throttle(
+            async (partialResponse: ChatResponseV3 | ChatResponseV4) => {
+              const resText =
+                apiType === 'browser'
+                  ? (partialResponse as ChatResponseV3).response
+                  : (partialResponse as ChatResponseV4).text;
+              reply = await this._editMessage(reply, resText);
+              await this._bot.sendChatAction(chatId, 'typing');
+            },
+            3000,
+            {leading: true, trailing: false}
+          )
+        );
+        resText =
+          apiType === 'browser'
+            ? (res as ChatResponseV3).response
+            : (res as ChatResponseV4).text;
+        await this._editMessage(reply, resText);
+      }
 
       if (this.debug >= 1) logWithTime(`📨 Response:\n${resText}`);
     } catch (err) {
       logWithTime('⛔️ ChatGPT API error:', (err as Error).message);
       this._bot.sendMessage(
         chatId,
-        "⚠️ Sorry, I'm having trouble connecting to the server, please try again later."
+        "⚠️ 抱歉，我无法连接到服务器，请稍后再试。"
       );
     }
 
@@ -116,12 +142,19 @@ class ChatHandler {
   protected _editMessage = async (
     msg: TelegramBot.Message,
     text: string,
-    needParse = true
+    needParse = true,
+    sourceAttributions?: SourceAttributions
   ) => {
     if (text.trim() == '' || msg.text == text) {
       return msg;
     }
     try {
+      if (sourceAttributions && sourceAttributions.length > 0) {
+        const regex = /\[\^(\d+)\^\]/g;
+        text = text.replace(regex, (match, p1) =>
+          match + "(" + sourceAttributions[p1 - 1].seeMoreUrl + ")"
+        );
+      }
       text = telegramifyMarkdown(text, 'escape');
       const res = await this._bot.editMessageText(text, {
         chat_id: msg.chat.id,

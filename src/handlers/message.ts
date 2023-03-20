@@ -1,5 +1,6 @@
 import type TelegramBot from 'node-telegram-bot-api';
 import type {ChatGPT} from '../api';
+import type {InMemoryDatabase} from '../db';
 import {BotOptions} from '../types';
 import {logWithTime} from '../utils';
 import {Authenticator} from './authentication';
@@ -12,11 +13,12 @@ class MessageHandler {
   protected _bot: TelegramBot;
   protected _botUsername = '';
   protected _api: ChatGPT;
+  protected _db: InMemoryDatabase;
   protected _authenticator: Authenticator;
   protected _commandHandler: CommandHandler;
   protected _chatHandler: ChatHandler;
 
-  constructor(bot: TelegramBot, api: ChatGPT, botOpts: BotOptions, debug = 1) {
+  constructor(db: InMemoryDatabase, bot: TelegramBot, api: ChatGPT, botOpts: BotOptions, debug = 1) {
     this.debug = debug;
     this._bot = bot;
     this._api = api;
@@ -24,6 +26,7 @@ class MessageHandler {
     this._authenticator = new Authenticator(bot, botOpts, debug);
     this._commandHandler = new CommandHandler(bot, api, botOpts, debug);
     this._chatHandler = new ChatHandler(bot, api, botOpts, debug);
+    this._db = db;
   }
 
   init = async () => {
@@ -52,7 +55,7 @@ class MessageHandler {
       // - direct messages in private chats
       // - replied messages in both private chats and group chats
       // - messages that start with `chatCmd` in private chats and group chats
-      await this._chatHandler.handle(msg, text, isMentioned, this._botUsername);
+      await this._chatHandler.handle(this._db, msg, text, isMentioned, this._botUsername);
     }
   };
 

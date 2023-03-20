@@ -7,6 +7,7 @@ import {
   APIBrowserOptions,
   APIOfficialOptions,
   APIUnofficialOptions,
+  APIBingOptions,
 } from './types';
 const {HttpsProxyAgent} = pkg;
 
@@ -30,10 +31,11 @@ function loadConfig(): Config {
       )) as FetchFn;
   }
 
-  const apiType = config.get<'browser' | 'official' | 'unofficial'>('api.type');
+  const apiType = config.get<'browser' | 'official' | 'unofficial' | 'bing'>('api.type');
   let apiBrowserCfg: APIBrowserOptions | undefined;
   let apiOfficialCfg: APIOfficialOptions | undefined;
   let apiUnofficialCfg: APIUnofficialOptions | undefined;
+  let apiBingCfg: APIBingOptions | undefined;;
   if (apiType == 'browser') {
     apiBrowserCfg = {
       email: config.get<string>('api.browser.email'),
@@ -78,9 +80,23 @@ function loadConfig(): Config {
       fetch: fetchFn,
       debug: config.get<number>('debug') >= 2,
     };
+  // } else if (apiType == 'bing') {
+  //   apiBingCfg = {
+  //     host: tryGet<string>('api.bing.host') || undefined,
+  //     userToken: config.get<string>('api.bing.userToken'),
+  //     cookies: tryGet<string>('api.bing.cookies') || undefined,
+  //     proxy: tryGet<string>('api.bing.proxy') || undefined,
+  //   };
   } else {
     throw new RangeError('Invalid API type');
   }
+  
+  apiBingCfg = {
+    host: tryGet<string>('api.bing.host') || undefined,
+    userToken: config.get<string>('api.bing.userToken'),
+    cookies: tryGet<string>('api.bing.cookies') || undefined,
+    proxy: tryGet<string>('api.bing.proxy') || undefined,
+  };
 
   const cfg = {
     debug: tryGet<number>('debug') || 1,
@@ -95,6 +111,7 @@ function loadConfig(): Config {
       browser: apiBrowserCfg,
       official: apiOfficialCfg,
       unofficial: apiUnofficialCfg,
+      bing: apiBingCfg,
     },
     proxy: proxy,
   };
