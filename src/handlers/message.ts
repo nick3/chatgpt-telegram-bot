@@ -80,11 +80,26 @@ class MessageHandler {
           // Add other entity.type cases here
           case 'mention':
             // Handle mention entity type
-            isMentioned = true
             if (msg.text) {
+              if (text.includes(`@${this._botUsername}`)) {
+                isMentioned = true;
+              }
               const { offset, length } = entity;   
               text = msg.text;
               text = (text.slice(0, offset) + text.slice(offset + length)).trim();
+              if (msg.reply_to_message) {
+                const { forward_from, from, text: replyOriginText } = msg.reply_to_message;
+                let first_name: string | undefined = '';
+                let last_name: string | undefined = '';
+                if (forward_from) {
+                  first_name = forward_from.first_name
+                  last_name = forward_from.last_name
+                } else {
+                  first_name = from?.first_name
+                  last_name = from?.last_name
+                }
+                text = `${first_name ?? ''}${last_name ?? ''}说：“${replyOriginText}” ${text}`;
+              }
             } else {
               text = ''
             }

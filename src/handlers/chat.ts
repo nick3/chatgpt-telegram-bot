@@ -80,7 +80,7 @@ class ChatHandler {
     let reply = originalReply;
     await this._bot.sendChatAction(chatId, 'typing');
 
-    // Send message to ChatGPT
+    // Send message to ChatGPT or Bing AI
     try {
       let res;
       let resText = '';
