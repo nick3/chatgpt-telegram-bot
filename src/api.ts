@@ -48,33 +48,22 @@ class ChatGPT {
   protected _apiUnofficialProxy: ChatGPTUnofficialProxyAPI | undefined;
   protected _context: ChatContext = {};
   protected _timeoutMs: number | undefined;
-  protected _cacheOptions: {
-    store: KeyvFile<{
-      key: string;
-      value: any;
-    }>;
-    namespace: string;
-  };
+  protected _bingAIClients: Record<string, {
+    client: BingAIClient,
+    cacheOptions: {
+      store: KeyvFile<{
+        key: string;
+        value: any;
+      }>;
+      namespace: string;
+    }
+  }> = {};
 
   constructor(apiOpts: APIOptions, debug = 1) {
     this.debug = debug;
     this.apiType = apiOpts.type;
     this._opts = apiOpts;
     this._timeoutMs = undefined;
-    this._cacheOptions = {
-      // Options for the Keyv cache, see https://www.npmjs.com/package/keyv
-      // This is used for storing conversations, and supports additional drivers (conversations are stored in memory by default)
-      // For example, to use a JSON file (`npm i keyv-file`) as a database:
-      // store: new KeyvFile({ filename: 'cache.json' }),
-      store: new KeyvFile({
-        filename: 'cache.json',
-        expiredCheckDelay: 3 * 3600 * 1000,
-        writeDelay: 1000,
-        encode: JSON.stringify, // serialize function
-        decode: JSON.parse // deserialize function
-      }),
-      namespace: 'bing',
-    };
   }
 
   init = async () => {
@@ -101,11 +90,7 @@ class ChatGPT {
       this._api = this._apiUnofficialProxy;
       this._timeoutMs = this._opts.unofficial?.timeoutMs;
     } else if (this._opts.type == 'bing') {
-      console.log('this._opts.bing', this._opts.bing);
-      this._api = new BingAIClient({
-        ...(this._opts.bing as APIBingOptions),
-        cache: this._cacheOptions,
-       });
+      this._bingAIClients = {};
       this._timeoutMs = this._opts.browser?.timeoutMs;
     } else {
       throw new RangeError('Invalid API type');
@@ -122,12 +107,39 @@ class ChatGPT {
     this._opts.type = type;
     await this.init();
   };
+
+  createNewBingClient = (chatId: number) => {
+    const cacheOptions = {
+      // Options for the Keyv cache, see https://www.npmjs.com/package/keyv
+      // This is used for storing conversations, and supports additional drivers (conversations are stored in memory by default)
+      // For example, to use a JSON file (`npm i keyv-file`) as a database:
+      // store: new KeyvFile({ filename: 'cache.json' }),
+      store: new KeyvFile({
+        filename: `cache-${chatId}.json`,
+        expiredCheckDelay: 3 * 3600 * 1000,
+        writeDelay: 1000,
+        encode: JSON.stringify, // serialize function
+        decode: JSON.parse // deserialize function
+      }),
+      namespace: `bing-${chatId}`,
+    };
+    const client = new BingAIClient({
+      ...(this._opts.bing as APIBingOptions),
+      cache: cacheOptions,
+    });
+    this._bingAIClients[`${chatId}`] = {
+      client,
+      cacheOptions,
+    };
+    return client;
+  };
   
   sendMessage = async (
+    chatId: number,
     text: string,
     onProgress?: (res: ChatResponseV3 | ChatResponseV4 | BingResponse) => void
   ) => {
-    if (!this._api) return;
+    if (this._opts.type !== 'bing' && !this._api) return;
 
     let res: ChatResponseV3 | ChatResponseV4 | BingResponse;
     if (this.apiType == 'official') {
@@ -138,29 +150,34 @@ class ChatGPT {
         timeoutMs: this._timeoutMs,
       });
     } else if (this.apiType == 'bing') {
-      if (!this._api) return;
+      console.log('this._bingAIClients',this._bingAIClients, this._bingAIClients[`${chatId}`])
+      if (this._bingAIClients[`${chatId}`]) {
+        this._api = this._bingAIClients[`${chatId}`]?.client;
+      } else {
+        this._api = this.createNewBingClient(chatId);
+      }
       try {
         res = await this._api.sendMessage(text, {
           jailbreakConversationId: true,
           ...this._context,
           toneStyle: 'creative',
           onProgress,
-          timeoutMs: this._timeoutMs,
         });
         if (MAX_MESSAGES_PER_CONVERSATION > 0) {
           this._messagesSent++;
           if (this._messagesSent >= MAX_MESSAGES_PER_CONVERSATION) {
               // Start a new conversation with a new token
-              await this.startNewBingConversation();
+              await this.startNewBingConversation(chatId);
               this._messagesSent = 0;
           } 
         }
       } catch (error) {
         console.log(error);
-        this.startNewBingConversation();
+        this.startNewBingConversation(chatId);
         return;
       }
     } else {
+      if (!this._api) return;
       res = await this._api.sendMessage(text, {
         ...this._context,
         onProgress,
@@ -193,10 +210,10 @@ class ChatGPT {
     return res;
   };
 
-  startNewBingConversation = async () => {
+  startNewBingConversation = async (chatId: number) => {
     await this.resetThread();
     if (this._opts.type == 'bing') {
-      (this._api as BingAIClient)?.conversationsCache.clear();
+      this._bingAIClients[`${chatId}`]?.client.conversationsCache.clear();
     }
   };
   

@@ -95,6 +95,7 @@ class ChatHandler {
           {leading: true, trailing: false}
         );
         res = await this._api.sendMessage(
+          chatId,
           text,
           (token) => {
             resText += token;
@@ -104,6 +105,7 @@ class ChatHandler {
         await this._editMessage(reply, resText, true, (res as BingResponse).details?.sourceAttributions);
       } else {
         res = await this._api.sendMessage(
+          chatId,
           text,
           _.throttle(
             async (partialResponse: ChatResponseV3 | ChatResponseV4) => {
