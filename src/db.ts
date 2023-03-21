@@ -19,19 +19,19 @@ class DB {
     });
   }
 
-  // 添加聊天记录和用户名
+  // 添加聊天记录
   async addChatRecord(chatId: string, username: string, message: string): Promise<void> {
     const records = await this.chatRecords.get(chatId) || [];
     records.push({username, message});
     await this.chatRecords.set(chatId, records);
   }
 
-  // 获取聊天记录和用户名
+  // 获取聊天记录
   async getChatRecords(chatId: string): Promise<{username: string, message: string}[] | undefined> {
     return await this.chatRecords.get(chatId);
   }
 
-  // 清除聊天记录和用户名
+  // 清除聊天记录
   async clearChatRecords(chatId: string): Promise<void> {
     await this.chatRecords.delete(chatId);
   }
@@ -42,7 +42,7 @@ class DB {
     const records = await this.chatRecords.get(chatId);
     if (records) {
       for (const record of records) {
-        result += `${record.username}: ${record.message}\n `;
+        result += `${record.username}: ${record.message}\n`;
       }
     }
     return result;

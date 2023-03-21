@@ -45,10 +45,12 @@ class MessageHandler {
     if (command != '' && command != this._opts.chatCmd) {
       // For commands except `${chatCmd}`, pass the request to commandHandler.
       await this._commandHandler.handle(
+        this._db,
         msg,
         command,
         isMentioned,
-        this._botUsername
+        this._botUsername,
+        this._chatHandler
       );
     } else {
       // Handles:

@@ -28,7 +28,7 @@ class ChatHandler {
     this._opts = botOpts;
   }
 
-  handle = async (db: DB, msg: TelegramBot.Message, text: string, isMentioned: boolean, botUsername: string) => {
+  handle = async (db: DB | null, msg: TelegramBot.Message, text: string, isMentioned: boolean, botUsername: string) => {
     if (!text) return;
 
     const chatId = msg.chat.id;
@@ -41,7 +41,7 @@ class ChatHandler {
       logWithTime(`📩 Message from ${userInfo} in ${chatInfo}:\n${text}`);
     }
 
-    db.addChatRecord(`${chatId}`, msg.from?.username ?? '', text);
+    db?.addChatRecord(`${chatId}`, msg.from?.username ?? '', text);
 
     // Check if the message is a reply to the bot's message
     const isReplyToBot = msg.reply_to_message?.from?.username === botUsername;

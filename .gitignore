@@ -136,3 +136,4 @@ dist
 # Config files
 config/local*.json
 /cache.json
+/chatRecords.json
