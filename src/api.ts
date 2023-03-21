@@ -139,20 +139,26 @@ class ChatGPT {
       });
     } else if (this.apiType == 'bing') {
       if (!this._api) return;
-      res = await this._api.sendMessage(text, {
-        jailbreakConversationId: true,
-        ...this._context,
-        toneStyle: 'creative',
-        onProgress,
-        timeoutMs: this._timeoutMs,
-      });
-      if (MAX_MESSAGES_PER_CONVERSATION > 0) {
-        this._messagesSent++;
-        if (this._messagesSent >= MAX_MESSAGES_PER_CONVERSATION) {
-            // Start a new conversation with a new token
-            await this.startNewBingConversation();
-            this._messagesSent = 0;
-        } 
+      try {
+        res = await this._api.sendMessage(text, {
+          jailbreakConversationId: true,
+          ...this._context,
+          toneStyle: 'creative',
+          onProgress,
+          timeoutMs: this._timeoutMs,
+        });
+        if (MAX_MESSAGES_PER_CONVERSATION > 0) {
+          this._messagesSent++;
+          if (this._messagesSent >= MAX_MESSAGES_PER_CONVERSATION) {
+              // Start a new conversation with a new token
+              await this.startNewBingConversation();
+              this._messagesSent = 0;
+          } 
+        }
+      } catch (error) {
+        console.log(error);
+        this.startNewBingConversation();
+        return;
       }
     } else {
       res = await this._api.sendMessage(text, {
