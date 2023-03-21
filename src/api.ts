@@ -185,9 +185,9 @@ class ChatGPT {
       jailbreakConversationId: (res as BingResponse).jailbreakConversationId as string,
       conversationId: res.conversationId,
       parentMessageId: parentMessageId,
-      conversationSignature: (res as BingResponse).conversationSignature,
-      clientId: (res as BingResponse).clientId,
-      invocationId: (res as BingResponse).invocationId,
+      // conversationSignature: (res as BingResponse).conversationSignature,
+      // clientId: (res as BingResponse).clientId,
+      // invocationId: (res as BingResponse).invocationId,
     };
 
     return res;
