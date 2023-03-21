@@ -1,5 +1,5 @@
 import Keyv from 'keyv';
-import KeyvFile from 'keyv-file';
+import { KeyvFile } from 'keyv-file';
 
 // 创建一个数据库，用来存储当天的聊天记录和用户名
 class DB {
@@ -14,7 +14,8 @@ class DB {
         encode: JSON.stringify, // serialize function
         decode: JSON.parse // deserialize function
       }),
-      ttl: 86400000
+      ttl: 86400000,
+      namespace: 'chatdb',
     });
   }
 
