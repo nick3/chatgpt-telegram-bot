@@ -1,6 +1,6 @@
 import type {ChatMessage as ChatResponseV4} from 'chatgpt';
 import type {ChatResponse as ChatResponseV3} from 'chatgpt-v3';
-import type {InMemoryDatabase} from '../db';
+import type {DB} from '../db';
 import _ from 'lodash';
 import type TelegramBot from 'node-telegram-bot-api';
 import telegramifyMarkdown from 'telegramify-markdown';
@@ -28,7 +28,7 @@ class ChatHandler {
     this._opts = botOpts;
   }
 
-  handle = async (db: InMemoryDatabase, msg: TelegramBot.Message, text: string, isMentioned: boolean, botUsername: string) => {
+  handle = async (db: DB, msg: TelegramBot.Message, text: string, isMentioned: boolean, botUsername: string) => {
     if (!text) return;
 
     const chatId = msg.chat.id;

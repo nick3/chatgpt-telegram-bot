@@ -12,6 +12,7 @@ declare module '@waylaidwanderer/chatgpt-api' {
       proxy?: string;
       debug?: boolean;
     });
+    conversationsCache: Keyv;
     setOptions(options: {
       host?: string;
       userToken?: string;

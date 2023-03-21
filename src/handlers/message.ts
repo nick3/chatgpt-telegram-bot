@@ -1,6 +1,6 @@
 import type TelegramBot from 'node-telegram-bot-api';
 import type {ChatGPT} from '../api';
-import type {InMemoryDatabase} from '../db';
+import type {DB} from '../db';
 import {BotOptions} from '../types';
 import {logWithTime} from '../utils';
 import {Authenticator} from './authentication';
@@ -13,12 +13,12 @@ class MessageHandler {
   protected _bot: TelegramBot;
   protected _botUsername = '';
   protected _api: ChatGPT;
-  protected _db: InMemoryDatabase;
+  protected _db: DB;
   protected _authenticator: Authenticator;
   protected _commandHandler: CommandHandler;
   protected _chatHandler: ChatHandler;
 
-  constructor(db: InMemoryDatabase, bot: TelegramBot, api: ChatGPT, botOpts: BotOptions, debug = 1) {
+  constructor(db: DB, bot: TelegramBot, api: ChatGPT, botOpts: BotOptions, debug = 1) {
     this.debug = debug;
     this._bot = bot;
     this._api = api;

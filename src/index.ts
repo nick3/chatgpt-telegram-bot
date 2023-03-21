@@ -2,12 +2,12 @@ import TelegramBot from 'node-telegram-bot-api';
 import {ChatGPT} from './api';
 import {MessageHandler} from './handlers/message';
 import {loadConfig} from './utils';
-import {InMemoryDatabase} from './db'; // 引入InMemoryDatabase类
+import {DB} from './db'; // 引入InMemoryDatabase类
 
 async function main() {
   const opts = loadConfig();
 
-  const inMemoryDatabase = new InMemoryDatabase(); // 在main函数里对InMemoryDatabase进行实例化
+  const db = new DB(); // 在main函数里对InMemoryDatabase进行实例化
 
   // Initialize ChatGPT API.
   const api = new ChatGPT(opts.api);
@@ -19,7 +19,7 @@ async function main() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     request: {proxy: opts.proxy} as any,
   });
-  const messageHandler = new MessageHandler(inMemoryDatabase, bot, api, opts.bot, opts.debug);
+  const messageHandler = new MessageHandler(db, bot, api, opts.bot, opts.debug);
   await messageHandler.init();
 
   bot.on('message', messageHandler.handle);

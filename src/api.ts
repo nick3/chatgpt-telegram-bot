@@ -25,9 +25,15 @@ interface ChatContext {
   jailbreakConversationId?: string;
   conversationId?: string;
   parentMessageId?: string;
+  conversationSignature?: string;
+  clientId?: string;
+  invocationId?: number;
 }
 
+const MAX_MESSAGES_PER_CONVERSATION = -1;
+
 class ChatGPT {
+  private _messagesSent = 0;
   debug: number;
   protected apiType: string;
   protected _opts: APIOptions;
@@ -42,7 +48,13 @@ class ChatGPT {
   protected _apiUnofficialProxy: ChatGPTUnofficialProxyAPI | undefined;
   protected _context: ChatContext = {};
   protected _timeoutMs: number | undefined;
-  protected _cacheOptions: object;
+  protected _cacheOptions: {
+    store: KeyvFile<{
+      key: string;
+      value: any;
+    }>;
+    namespace: string;
+  };
 
   constructor(apiOpts: APIOptions, debug = 1) {
     this.debug = debug;
@@ -56,7 +68,7 @@ class ChatGPT {
       // store: new KeyvFile({ filename: 'cache.json' }),
       store: new KeyvFile({
         filename: 'cache.json',
-        expiredCheckDelay: 24 * 3600 * 1000,
+        expiredCheckDelay: 3 * 3600 * 1000,
         writeDelay: 1000,
         encode: JSON.stringify, // serialize function
         decode: JSON.parse // deserialize function
@@ -134,6 +146,14 @@ class ChatGPT {
         onProgress,
         timeoutMs: this._timeoutMs,
       });
+      if (MAX_MESSAGES_PER_CONVERSATION > 0) {
+        this._messagesSent++;
+        if (this._messagesSent >= MAX_MESSAGES_PER_CONVERSATION) {
+            // Start a new conversation with a new token
+            await this.startNewBingConversation();
+            this._messagesSent = 0;
+        } 
+      }
     } else {
       res = await this._api.sendMessage(text, {
         ...this._context,
@@ -159,11 +179,21 @@ class ChatGPT {
       jailbreakConversationId: (res as BingResponse).jailbreakConversationId as string,
       conversationId: res.conversationId,
       parentMessageId: parentMessageId,
+      conversationSignature: (res as BingResponse).conversationSignature,
+      clientId: (res as BingResponse).clientId,
+      invocationId: (res as BingResponse).invocationId,
     };
 
     return res;
   };
 
+  startNewBingConversation = async () => {
+    await this.resetThread();
+    if (this._opts.type == 'bing') {
+      (this._api as BingAIClient)?.conversationsCache.clear();
+    }
+  };
+  
   resetThread = async () => {
     if (this._apiBrowser) {
       await this._apiBrowser.resetThread();
