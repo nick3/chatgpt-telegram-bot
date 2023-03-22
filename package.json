@@ -46,7 +46,7 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
-    "@waylaidwanderer/chatgpt-api": "^1.32.1",
+    "@waylaidwanderer/chatgpt-api": "github:nick3/node-chatgpt-api",
     "chatgpt": "^5.1.1",
     "config": "^3.3.9",
     "dotenv": "^16.0.3",

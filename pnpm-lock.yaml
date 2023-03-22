@@ -8,7 +8,7 @@ specifiers:
   '@types/promise-queue': ^2.2.0
   '@typescript-eslint/eslint-plugin': ^5.55.0
   '@typescript-eslint/parser': ^5.55.0
-  '@waylaidwanderer/chatgpt-api': ^1.32.1
+  '@waylaidwanderer/chatgpt-api': github:nick3/node-chatgpt-api
   chatgpt: ^5.1.1
   chatgpt-v3: npm:chatgpt@3.5.1
   config: ^3.3.9
@@ -32,7 +32,7 @@ specifiers:
   typescript: ^4.9.5
 
 dependencies:
-  '@waylaidwanderer/chatgpt-api': 1.32.1
+  '@waylaidwanderer/chatgpt-api': github.com/nick3/node-chatgpt-api/0ff7b274135d1c665625887f51763ecb7eb1a21b
   chatgpt: 5.1.1
   config: 3.3.9
   dotenv: 16.0.3
@@ -434,39 +434,12 @@ packages:
       eslint-visitor-keys: 3.3.0
     dev: true
 
-  /@waylaidwanderer/chatgpt-api/1.32.1:
-    resolution: {integrity: sha512-0ElaF5qDTXp1bEjulolCuIQAm7MgYElQUmvofP2f9fBKmfuMAvJTYYQmJEWk/T68odKuBJdmRa29RO+6KB4kzg==}
-    hasBin: true
-    dependencies:
-      '@dqbd/tiktoken': 1.0.2
-      '@fastify/cors': 8.2.1
-      '@waylaidwanderer/fastify-sse-v2': 3.1.0_fastify@4.14.1
-      '@waylaidwanderer/fetch-event-source': 3.0.1
-      boxen: 7.0.2
-      clipboardy: 3.0.0
-      dotenv: 16.0.3
-      fastify: 4.14.1
-      fetch-undici: 3.0.1
-      https-proxy-agent: 5.0.1
-      inquirer: 9.1.5
-      inquirer-autocomplete-prompt: 3.0.0_inquirer@9.1.5
-      keyv: 4.5.2
-      keyv-file: 0.2.0
-      ora: 6.2.0
-      undici: 5.21.0
-      ws: 8.12.1
-    transitivePeerDependencies:
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-    dev: false
-
-  /@waylaidwanderer/fastify-sse-v2/3.1.0_fastify@4.14.1:
+  /@waylaidwanderer/fastify-sse-v2/3.1.0_fastify@4.15.0:
     resolution: {integrity: sha512-R6/VT14+iGZmyp7Jih7FYZuWr0B0gJ9uym1xoVPlKjZBngzFS2bL8yvZyEIPbMrTjrC8syZY2z2WuMHsipRfpw==}
     peerDependencies:
       fastify: '>=4'
     dependencies:
-      fastify: 4.14.1
+      fastify: 4.15.0
       fastify-plugin: 4.5.0
       it-pushable: 1.4.2
       it-to-stream: 1.0.0
@@ -1632,8 +1605,8 @@ packages:
     resolution: {integrity: sha512-79ak0JxddO0utAXAQ5ccKhvs6vX2MGyHHMMsmZkBANrq3hXc1CHzvNPHOcvTsVMEPl5I+NT+RO4YKMGehOfSIg==}
     dev: false
 
-  /fastify/4.14.1:
-    resolution: {integrity: sha512-yjrDeXe77j9gRlSV2UJry8mcFWbD0NQ5JYjnPi4tkFjHZVaG3/BD5wxOmRzGnHPC0YvaBJ0XWrIfFPl2IHRa1w==}
+  /fastify/4.15.0:
+    resolution: {integrity: sha512-m/CaRN8nf5uyYdrDe2qqq+0z3oGyE+A++qlKQoLJTI4WI0nWK9D6R3FxXQ3MVwt/md977GMR4F43pE9oqrS2zw==}
     dependencies:
       '@fastify/ajv-compiler': 3.5.0
       '@fastify/error': 3.2.0
@@ -3517,7 +3490,7 @@ packages:
       quick-format-unescaped: 4.0.4
       real-require: 0.2.0
       safe-stable-stringify: 2.4.3
-      sonic-boom: 3.2.1
+      sonic-boom: 3.3.0
       thread-stream: 2.3.0
     dev: false
 
@@ -4154,8 +4127,8 @@ packages:
       is-fullwidth-code-point: 4.0.0
     dev: true
 
-  /sonic-boom/3.2.1:
-    resolution: {integrity: sha512-iITeTHxy3B9FGu8aVdiDXUVAcHMF9Ss0cCsAOo2HfCrmVGT3/DT5oYaeu0M/YKZDlKTvChEyPq0zI9Hf33EX6A==}
+  /sonic-boom/3.3.0:
+    resolution: {integrity: sha512-LYxp34KlZ1a2Jb8ZQgFCK3niIHzibdwtwNUWKg0qQRzsDoJ3Gfgkf8KdBTFU3SkejDEIlWwnSnpVdOZIhFMl/g==}
     dependencies:
       atomic-sleep: 1.0.0
     dev: false
@@ -4890,4 +4863,33 @@ packages:
 
   /zwitch/2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
+    dev: false
+
+  github.com/nick3/node-chatgpt-api/0ff7b274135d1c665625887f51763ecb7eb1a21b:
+    resolution: {tarball: https://codeload.github.com/nick3/node-chatgpt-api/tar.gz/0ff7b274135d1c665625887f51763ecb7eb1a21b}
+    name: '@waylaidwanderer/chatgpt-api'
+    version: 1.32.1
+    hasBin: true
+    dependencies:
+      '@dqbd/tiktoken': 1.0.2
+      '@fastify/cors': 8.2.1
+      '@waylaidwanderer/fastify-sse-v2': 3.1.0_fastify@4.15.0
+      '@waylaidwanderer/fetch-event-source': 3.0.1
+      boxen: 7.0.2
+      clipboardy: 3.0.0
+      dotenv: 16.0.3
+      fastify: 4.15.0
+      fetch-undici: 3.0.1
+      https-proxy-agent: 5.0.1
+      inquirer: 9.1.5
+      inquirer-autocomplete-prompt: 3.0.0_inquirer@9.1.5
+      keyv: 4.5.2
+      keyv-file: 0.2.0
+      ora: 6.2.0
+      undici: 5.21.0
+      ws: 8.12.1
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
     dev: false
