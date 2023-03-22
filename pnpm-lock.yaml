@@ -8,7 +8,7 @@ specifiers:
   '@types/promise-queue': ^2.2.0
   '@typescript-eslint/eslint-plugin': ^5.55.0
   '@typescript-eslint/parser': ^5.55.0
-  '@waylaidwanderer/chatgpt-api': ^1.31.6
+  '@waylaidwanderer/chatgpt-api': ^1.32.1
   chatgpt: ^5.1.1
   chatgpt-v3: npm:chatgpt@3.5.1
   config: ^3.3.9
@@ -32,7 +32,7 @@ specifiers:
   typescript: ^4.9.5
 
 dependencies:
-  '@waylaidwanderer/chatgpt-api': 1.31.6
+  '@waylaidwanderer/chatgpt-api': 1.32.1
   chatgpt: 5.1.1
   config: 3.3.9
   dotenv: 16.0.3
@@ -434,8 +434,8 @@ packages:
       eslint-visitor-keys: 3.3.0
     dev: true
 
-  /@waylaidwanderer/chatgpt-api/1.31.6:
-    resolution: {integrity: sha512-Db6UK1FRvaUWbFRb6Lg8xnvjkSKjjt4iKYRKPvGNL8LdAiR9Th9e5rLVGHIbGeVBgWWiWH54ei3lQO+oGX9A6w==}
+  /@waylaidwanderer/chatgpt-api/1.32.1:
+    resolution: {integrity: sha512-0ElaF5qDTXp1bEjulolCuIQAm7MgYElQUmvofP2f9fBKmfuMAvJTYYQmJEWk/T68odKuBJdmRa29RO+6KB4kzg==}
     hasBin: true
     dependencies:
       '@dqbd/tiktoken': 1.0.2

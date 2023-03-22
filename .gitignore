@@ -137,3 +137,6 @@ dist
 config/local*.json
 /cache.json
 /chatRecords.json
+/cache--1001948111352.json
+/cache-316108337.json
+/.vscode/settings.json
