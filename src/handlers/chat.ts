@@ -9,12 +9,14 @@ import {BotOptions} from '../types';
 import {logWithTime} from '../utils';
 import Queue from 'promise-queue';
 import { BingResponse, SourceAttributions } from '@waylaidwanderer/chatgpt-api';
+import {MsEdgeTTS, OUTPUT_FORMAT} from "msedge-tts";
 
 class ChatHandler {
   debug: number;
   protected _opts: BotOptions;
   protected _bot: TelegramBot;
   protected _api: ChatGPT;
+  protected _tts: MsEdgeTTS;
   protected _n_queued = 0;
   protected _n_pending = 0;
   protected _apiRequestsQueue = new Queue(1, Infinity);
@@ -26,6 +28,8 @@ class ChatHandler {
     this._bot = bot;
     this._api = api;
     this._opts = botOpts;
+    this._tts = new MsEdgeTTS();
+    this._tts.setMetadata("zh-CN-XiaoxiaoNeural", OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
   }
 
   handle = async (db: DB | null, msg: TelegramBot.Message, text: string, isMentioned: boolean, botUsername: string) => {
@@ -124,6 +128,7 @@ class ChatHandler {
             : (res as ChatResponseV4).text;
         await this._editMessage(reply, resText);
       }
+      await this.sendVoice(chatId, resText);
 
       if (this.debug >= 1) logWithTime(`📨 Response:\n${resText}`);
     } catch (err) {
@@ -175,6 +180,21 @@ class ChatHandler {
       return msg;
     }
   };
+
+  protected sendVoice = async (chatId: number, text: string) => {
+    try {
+      const filepath = await this._tts.toFile('./voice.mp3', this._removeNumberedFootnotes(text));
+      await this._bot.sendVoice(chatId, filepath);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  protected _removeNumberedFootnotes = (text: string) => {
+    const regex = /\[\^(\d+)\^\]/g;
+    return text.replace(regex, '');
+  };
+
 
   protected _getQueueKey = (chatId: number, messageId: number) =>
     `${chatId}:${messageId}`;

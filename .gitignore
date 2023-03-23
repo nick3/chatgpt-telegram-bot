@@ -140,3 +140,6 @@ config/local*.json
 /cache--1001948111352.json
 /cache-316108337.json
 /.vscode/settings.json
+/text.txt
+/voice.mp3
+/texttxt.mp3

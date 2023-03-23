@@ -55,6 +55,7 @@
     "keyv": "^4.5.2",
     "keyv-file": "^0.2.0",
     "lodash": "^4.17.21",
+    "msedge-tts": "^1.1.4",
     "node-fetch": "^3.3.1",
     "node-telegram-bot-api": "^0.60.0",
     "promise-queue": "^2.2.5",
