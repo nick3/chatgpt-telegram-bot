@@ -6,6 +6,7 @@ class DB {
   private chatRecords: Keyv<{username: string, message: string}[]>;
 
   constructor() {
+    // 创建一个 Keyv 实例，用来存储聊天记录
     this.chatRecords = new Keyv({
       store: new KeyvFile({
         filename: `chatRecords.json`,
@@ -21,8 +22,11 @@ class DB {
 
   // 添加聊天记录
   async addChatRecord(chatId: string, username: string, message: string): Promise<void> {
+    // 获取当前聊天室的聊天记录
     const records = await this.chatRecords.get(chatId) || [];
+    // 添加新的聊天记录
     records.push({username, message});
+    // 更新聊天记录
     await this.chatRecords.set(chatId, records);
   }
 

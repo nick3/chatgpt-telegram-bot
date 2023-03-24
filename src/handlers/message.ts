@@ -100,7 +100,7 @@ class MessageHandler {
                   first_name = from?.first_name
                   last_name = from?.last_name
                 }
-                text = `${first_name ?? ''}${last_name ?? ''}说：“${replyOriginText}” ${text}`;
+                text = `${first_name ?? ''}${last_name ?? ''}刚刚说：“${replyOriginText}”\n\n${text}`;
               }
             } else {
               text = ''
