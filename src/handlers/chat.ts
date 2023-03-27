@@ -11,6 +11,7 @@ import Queue from 'promise-queue';
 import { BingResponse, SourceAttributions } from '@waylaidwanderer/chatgpt-api';
 import {MsEdgeTTS, OUTPUT_FORMAT} from "msedge-tts";
 import { MessageType } from './message';
+import { Embeddings } from './embeddings';
 
 class ChatHandler {
   debug: number;
@@ -23,6 +24,7 @@ class ChatHandler {
   protected _apiRequestsQueue = new Queue(1, Infinity);
   protected _positionInQueue: Record<string, number> = {};
   protected _updatePositionQueue = new Queue(20, Infinity);
+  protected _embeddings?: Embeddings;
 
   constructor(bot: TelegramBot, api: ChatGPT, botOpts: BotOptions, debug = 1) {
     this.debug = debug;
@@ -35,6 +37,9 @@ class ChatHandler {
 
   handle = async (db: DB | null, msg: TelegramBot.Message, text: string, isMentioned: boolean, botUsername: string) => {
     if (!text) return;
+    if (!this._embeddings && db) {
+      this._embeddings = new Embeddings(db);
+    }
 
     const chatId = msg.chat.id;
     if (this.debug >= 1) {
@@ -45,6 +50,8 @@ class ChatHandler {
           : `group ${msg.chat.title} (${msg.chat.id})`;
       logWithTime(`📩 Message from ${userInfo} in ${chatInfo}:\n${text}`);
     }
+
+    this._embeddings?.addMessage(msg.chat.id, msg.from?.id, msg.from?.username, text);
 
     // Check if the message is a reply to the bot's message
     const isReplyToBot = msg.reply_to_message?.from?.username === botUsername;
