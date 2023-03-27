@@ -7,6 +7,7 @@ import { loadConfig } from '../utils';
 class Embeddings {
     protected _vectorStore: SupabaseVectorStore;
     protected _db: DB;
+    
     constructor(db: DB) {
         const config = loadConfig();
         const { api: apiConfig } = config;
@@ -23,13 +24,11 @@ class Embeddings {
         );
     }
 
-    async addMessage(chatId: number | undefined, userId: number | undefined, username: string | undefined, message: string) {
-        const doc = new Document({ pageContent: message, metadata: { source: chatId, userId, username } });
-        this._vectorStore.addDocuments([
-           doc 
+    async add(chatId: number | string, text: string) {
+        await this._vectorStore.addDocuments([
+            new Document({ pageContent: text, metadata: { source: chatId.toString() } }),
         ]);
     }
-
 }
 
 export { Embeddings };

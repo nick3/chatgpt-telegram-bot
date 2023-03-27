@@ -33,6 +33,7 @@
     "@types/config": "^3.3.0",
     "@types/lodash": "^4.14.191",
     "@types/node": "^18.15.3",
+    "@types/node-schedule": "^2.1.0",
     "@types/node-telegram-bot-api": "^0.57.7",
     "@types/promise-queue": "^2.2.0",
     "@typescript-eslint/eslint-plugin": "^5.55.0",
@@ -59,6 +60,7 @@
     "lodash": "^4.17.21",
     "msedge-tts": "^1.1.4",
     "node-fetch": "^3.3.1",
+    "node-schedule": "^2.1.1",
     "node-telegram-bot-api": "^0.60.0",
     "promise-queue": "^2.2.5",
     "telegramify-markdown": "^1.1.0"

@@ -37,6 +37,42 @@ class DB {
     return this.supabase;
   }
 
+  async getGroups(): Promise<string[] | null> {
+    const { data: groups, error } = await this.supabase
+      .from('groups')
+      .select('group_id');
+    if (error) {
+      console.error(error);
+      return null;
+    }
+    return groups.map((group) => group.group_id);
+  }
+
+  async addGroup(groupId: string): Promise<void> {
+    const { data, error } = await this.supabase
+      .from('groups')
+      .insert([
+        {
+          group_id: groupId,
+        },
+      ]);
+    if (error) {
+      console.error(error);
+      return undefined;
+    }
+  }
+
+  async removeGroup(groupId: string): Promise<void> {
+    const { data, error } = await this.supabase
+      .from('groups')
+      .delete()
+      .eq('group_id', groupId);
+    if (error) {
+      console.error(error);
+      return undefined;
+    }
+  }
+
   // 获取聊天记录
   async getChatRecords(chatId: string): Promise<{username: string, message: string}[] | undefined> {
     const { data, error } = await this.supabase
