@@ -11,6 +11,7 @@ import Queue from 'promise-queue';
 import { BingResponse, SourceAttributions } from '@waylaidwanderer/chatgpt-api';
 import {MsEdgeTTS, OUTPUT_FORMAT} from "msedge-tts";
 import { MessageType } from './message';
+import fs from 'fs';
 
 class ChatHandler {
   debug: number;
@@ -187,11 +188,16 @@ class ChatHandler {
   protected sendVoice = async (chatId: number, text: string) => {
     try {
       const filepath = await this._tts.toFile('./voice.mp3', this._removeNumberedFootnotes(text));
+      if (!fs.existsSync(filepath)) {
+        console.log('File does not exist');
+        return;
+      }
       await this._bot.sendVoice(chatId, filepath);
     } catch (error) {
       console.log(error);
     }
   };
+
 
   protected _removeNumberedFootnotes = (text: string) => {
     const regex = /\[\^(\d+)\^\]/g;
