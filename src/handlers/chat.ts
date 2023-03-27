@@ -130,7 +130,9 @@ class ChatHandler {
             : (res as ChatResponseV4).text;
         await this._editMessage(reply, resText);
       }
-      await this.sendVoice(chatId, resText);
+      
+      // 这里的代码还需要完善来保证tts服务不正常时不会影响bot的其它功能，暂时先注释掉tts功能。
+      // await this.sendVoice(chatId, resText);
   
       if (this.debug >= 1) logWithTime(`📨 Response:\n${resText}`);
     } catch (err) {
