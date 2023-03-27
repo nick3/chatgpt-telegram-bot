@@ -192,7 +192,8 @@ class ChatHandler {
 
   protected _removeNumberedFootnotes = (text: string) => {
     const regex = /\[\^(\d+)\^\]/g;
-    return text.replace(regex, '');
+    text = text.replace(regex, '').replace(/[_*`]/g, '');
+    return text;
   };
 
 

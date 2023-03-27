@@ -33,7 +33,7 @@ specifiers:
   typescript: ^4.9.5
 
 dependencies:
-  '@waylaidwanderer/chatgpt-api': github.com/nick3/node-chatgpt-api/aa5595892ac48dddea7e237c5253d12930cf0641
+  '@waylaidwanderer/chatgpt-api': github.com/nick3/node-chatgpt-api/3ea35275c00af6e83c36b20803dd59d5cad474f1
   chatgpt: 5.1.1
   config: 3.3.9
   dotenv: 16.0.3
@@ -5006,10 +5006,10 @@ packages:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
     dev: false
 
-  github.com/nick3/node-chatgpt-api/aa5595892ac48dddea7e237c5253d12930cf0641:
-    resolution: {tarball: https://codeload.github.com/nick3/node-chatgpt-api/tar.gz/aa5595892ac48dddea7e237c5253d12930cf0641}
+  github.com/nick3/node-chatgpt-api/3ea35275c00af6e83c36b20803dd59d5cad474f1:
+    resolution: {tarball: https://codeload.github.com/nick3/node-chatgpt-api/tar.gz/3ea35275c00af6e83c36b20803dd59d5cad474f1}
     name: '@waylaidwanderer/chatgpt-api'
-    version: 1.32.3
+    version: 1.32.10
     hasBin: true
     dependencies:
       '@dqbd/tiktoken': 1.0.2
