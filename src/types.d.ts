@@ -59,10 +59,15 @@ export interface APIOptions {
   bing?: APIBingOptions;
 }
 
+export interface DBOptions {
+  supabaseUrl: string;
+  supabaseKey: string;
+}
+
 export interface Config {
   debug: number;
   bot: BotOptions;
+  database: DBOptions;
   api: APIOptions;
   proxy?: string;
 }
-

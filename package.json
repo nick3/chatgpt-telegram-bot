@@ -46,6 +46,7 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.12.1",
     "@waylaidwanderer/chatgpt-api": "github:nick3/node-chatgpt-api",
     "chatgpt": "^5.1.1",
     "config": "^3.3.9",
@@ -54,6 +55,7 @@
     "https-proxy-agent": "^5.0.1",
     "keyv": "^4.5.2",
     "keyv-file": "^0.2.0",
+    "langchain": "^0.0.41",
     "lodash": "^4.17.21",
     "msedge-tts": "^1.1.4",
     "node-fetch": "^3.3.1",

@@ -101,7 +101,6 @@ class ChatGPT {
       this._api = this._apiUnofficialProxy;
       this._timeoutMs = this._opts.unofficial?.timeoutMs;
     } else if (this._opts.type == 'bing') {
-      console.log('this._opts.bing', this._opts.bing);
       this._api = new BingAIClient({
         ...(this._opts.bing as APIBingOptions),
         cache: this._cacheOptions,

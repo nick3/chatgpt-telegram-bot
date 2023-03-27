@@ -7,7 +7,7 @@ import {DB} from './db'; // 引入InMemoryDatabase类
 async function main() {
   const opts = loadConfig();
 
-  const db = new DB(); // 在main函数里对InMemoryDatabase进行实例化
+  const db = new DB(opts.database); // 在main函数里对InMemoryDatabase进行实例化
 
   // Initialize ChatGPT API.
   const api = new ChatGPT(opts.api);
