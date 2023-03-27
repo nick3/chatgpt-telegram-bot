@@ -33,6 +33,10 @@ class DB {
     }
   }
 
+  getClient(): SupabaseClient {
+    return this.supabase;
+  }
+
   // 获取聊天记录
   async getChatRecords(chatId: string): Promise<{username: string, message: string}[] | undefined> {
     const { data, error } = await this.supabase
