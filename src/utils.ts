@@ -106,6 +106,10 @@ function loadConfig(): Config {
       groupIds: tryGet<number[]>('bot.groupIds') || [],
       chatCmd: tryGet<string>('bot.chatCmd') || '/chat',
     },
+    database: {
+      supabaseUrl: config.get<string>('database.supabaseUrl'),
+      supabaseKey: config.get<string>('database.supabaseKey'),
+    },
     api: {
       type: apiType,
       browser: apiBrowserCfg,

@@ -1,12 +1,18 @@
 import type TelegramBot from 'node-telegram-bot-api';
 import type {ChatGPT} from '../api';
 import type {DB} from '../db';
-import {BotOptions} from '../types';
+import type {BotOptions} from '../types';
 import {logWithTime} from '../utils';
 import {Authenticator} from './authentication';
 import {ChatHandler} from './chat';
 import {CommandHandler} from './command';
 
+export enum MessageType {
+  COMMAND = 0,
+  REPLY = 1,
+  FORWARD = 2,
+  NORMAL = 3,
+}
 class MessageHandler {
   debug: number;
   protected _opts: BotOptions;
@@ -34,6 +40,23 @@ class MessageHandler {
     logWithTime(`🤖 Bot @${this._botUsername} has started...`);
   };
 
+  recordMessage = (msg: TelegramBot.Message, text: string, isCommand: boolean, command?: string) => {
+    let msgType = MessageType.NORMAL
+    let message = text;
+    if (isCommand) {
+      msgType = MessageType.COMMAND;
+      message = command ?? '';
+    }
+    if (msg.chat.type === 'private') {
+      const {id, username, first_name, last_name} = msg.from ?? {};
+      this._db.addChatRecord((id ?? '').toString(), (id ?? '').toString(), username, first_name, last_name, message, msg.message_id.toString(), msgType, false);
+    } else if (msg.chat.type === 'group' || msg.chat.type === 'supergroup') {
+      const {id, username, first_name, last_name} = msg.from ?? {};
+      const chatId = msg.chat.id.toString();
+      this._db.addChatRecord(chatId, (id ?? '').toString(), username, first_name, last_name, message, msg.message_id.toString(), msgType, true);
+    }
+  }
+
   handle = async (msg: TelegramBot.Message) => {
     if (this.debug >= 2) logWithTime(msg);
 
@@ -42,7 +65,9 @@ class MessageHandler {
 
     // Parse message.
     const {text, command, isMentioned} = this._parseMessage(msg);
+    
     if (command != '' && command != this._opts.chatCmd) {
+      this.recordMessage(msg, text, true, command);
       // For commands except `${chatCmd}`, pass the request to commandHandler.
       await this._commandHandler.handle(
         this._db,
@@ -53,6 +78,7 @@ class MessageHandler {
         this._chatHandler
       );
     } else {
+      this.recordMessage(msg, text, false);
       // Handles:
       // - direct messages in private chats
       // - replied messages in both private chats and group chats
@@ -100,7 +126,7 @@ class MessageHandler {
                   first_name = from?.first_name
                   last_name = from?.last_name
                 }
-                text = `${first_name ?? ''}${last_name ?? ''}说：“${replyOriginText}” ${text}`;
+                text = `${first_name ?? ''}${last_name ?? ''}刚刚说：“${replyOriginText}”\n\n${text}`;
               }
             } else {
               text = ''

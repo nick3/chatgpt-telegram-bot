@@ -6,6 +6,10 @@
     "userIds": [],
     "chatCmd": "/chat"
   },
+  "database": {
+    "supabaseUrl": "localhost",
+    "supabaseKey": ""
+  },
   "api": {
     "type": "official",
     "browser": {

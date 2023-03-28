@@ -9,12 +9,16 @@ import {BotOptions} from '../types';
 import {logWithTime} from '../utils';
 import Queue from 'promise-queue';
 import { BingResponse, SourceAttributions } from '@waylaidwanderer/chatgpt-api';
+import {MsEdgeTTS, OUTPUT_FORMAT} from "msedge-tts";
+import { MessageType } from './message';
+import fs from 'fs';
 
 class ChatHandler {
   debug: number;
   protected _opts: BotOptions;
   protected _bot: TelegramBot;
   protected _api: ChatGPT;
+  protected _tts: MsEdgeTTS;
   protected _n_queued = 0;
   protected _n_pending = 0;
   protected _apiRequestsQueue = new Queue(1, Infinity);
@@ -26,6 +30,8 @@ class ChatHandler {
     this._bot = bot;
     this._api = api;
     this._opts = botOpts;
+    this._tts = new MsEdgeTTS();
+    this._tts.setMetadata("zh-CN-XiaoxiaoNeural", OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
   }
 
   handle = async (db: DB | null, msg: TelegramBot.Message, text: string, isMentioned: boolean, botUsername: string) => {
@@ -40,8 +46,6 @@ class ChatHandler {
           : `group ${msg.chat.title} (${msg.chat.id})`;
       logWithTime(`📩 Message from ${userInfo} in ${chatInfo}:\n${text}`);
     }
-
-    db?.addChatRecord(`${chatId}`, msg.from?.username ?? '', text);
 
     // Check if the message is a reply to the bot's message
     const isReplyToBot = msg.reply_to_message?.from?.username === botUsername;
@@ -68,7 +72,9 @@ class ChatHandler {
           message_id: reply.message_id,
         }
       );
-      await requestPromise;
+      const resText = await requestPromise;
+      const { message_id, from } = reply;
+      await db?.addChatRecord(chatId.toString(), `${from?.id}`, from?.username, from?.first_name, from?.last_name, resText, message_id.toString(), MessageType.REPLY, msg.chat.type !== 'private');
     }
   };
 
@@ -78,12 +84,12 @@ class ChatHandler {
     originalReply: TelegramBot.Message
   ) => {
     let reply = originalReply;
+    let resText = '';
     await this._bot.sendChatAction(chatId, 'typing');
 
     // Send message to ChatGPT or Bing AI
     try {
       let res;
-      let resText = '';
       const apiType = this._api.getApiType();
       if (apiType === 'bing') {
         const throt_fun = _.throttle(
@@ -126,7 +132,10 @@ class ChatHandler {
             : (res as ChatResponseV4).text;
         await this._editMessage(reply, resText);
       }
-
+      
+      // 这里的代码还需要完善来保证 tts 服务不正常时不会影响 bot 的其它功能，暂时先注释掉 tts 功能。
+      // await this.sendVoice(chatId, resText);
+  
       if (this.debug >= 1) logWithTime(`📨 Response:\n${resText}`);
     } catch (err) {
       logWithTime('⛔️ ChatGPT API error:', (err as Error).message);
@@ -138,6 +147,8 @@ class ChatHandler {
 
     // Update queue order after finishing current request
     await this._updateQueue(chatId, reply.message_id);
+
+    return resText;
   };
 
   // Edit telegram message
@@ -177,6 +188,27 @@ class ChatHandler {
       return msg;
     }
   };
+
+  protected sendVoice = async (chatId: number, text: string) => {
+    try {
+      const filepath = await this._tts.toFile('./voice.mp3', this._removeNumberedFootnotes(text));
+      if (!fs.existsSync(filepath)) {
+        console.log('File does not exist');
+        return;
+      }
+      await this._bot.sendVoice(chatId, filepath);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+
+  protected _removeNumberedFootnotes = (text: string) => {
+    const regex = /\[\^(\d+)\^\]/g;
+    text = text.replace(regex, '').replace(/[_*`]/g, '');
+    return text;
+  };
+
 
   protected _getQueueKey = (chatId: number, messageId: number) =>
     `${chatId}:${messageId}`;

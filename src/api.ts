@@ -91,6 +91,10 @@ class ChatGPT {
       this._timeoutMs = this._opts.unofficial?.timeoutMs;
     } else if (this._opts.type == 'bing') {
       this._bingAIClients = {};
+      this._api = new BingAIClient({
+        ...(this._opts.bing as APIBingOptions),
+        cache: this._cacheOptions,
+       });
       this._timeoutMs = this._opts.browser?.timeoutMs;
     } else {
       throw new RangeError('Invalid API type');
