@@ -125,7 +125,7 @@ class DB {
       if (username && name.length === 0) {
         name = username;
       }
-      result += `${name}说:“${record.message}”\n\n`;
+      result += `${name}说:“${record.message}”\n`;
     }
     return result;
   }

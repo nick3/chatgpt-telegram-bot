@@ -1,5 +1,6 @@
 import { SupabaseVectorStore } from "langchain/vectorstores";
 import { OpenAIEmbeddings } from "langchain/embeddings";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { Document } from "langchain/document";
 import { DB } from '../db';
 import { loadConfig } from '../utils';
@@ -25,9 +26,18 @@ class Embeddings {
     }
 
     async add(chatId: number | string, text: string) {
-        await this._vectorStore.addDocuments([
-            new Document({ pageContent: text, metadata: { source: chatId.toString() } }),
-        ]);
+        try {
+            const splitter = new RecursiveCharacterTextSplitter({
+                chunkSize: 140,
+                chunkOverlap: 1,
+            });
+            const docOutput = await splitter.splitDocuments([
+                new Document({ pageContent: text, metadata: { source: chatId.toString() } }),
+            ]);
+            await this._vectorStore.addDocuments(docOutput);
+        } catch (error) {
+            console.error(error);
+        }
     }
 }
 
