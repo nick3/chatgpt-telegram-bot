@@ -8,7 +8,6 @@ import { processDailyChatRecords } from './handlers/tasks';
 
 async function main() {
   const opts = loadConfig();
-  const db = new DB();
 
   const db = new DB(opts.database);
 
