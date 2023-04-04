@@ -1,3 +1,4 @@
+/* eslint-disable no-case-declarations */
 import type TelegramBot from 'node-telegram-bot-api';
 import type {ChatGPT} from '../api';
 import type {DB} from '../db';
@@ -5,18 +6,28 @@ import {BotOptions} from '../types';
 import {logWithTime} from '../utils';
 import { ChatHandler } from './chat';
 import { summarize } from './summarization';
+import type { CallbackQuery } from 'node-telegram-bot-api';
 
 class CommandHandler {
   debug: number;
   protected _opts: BotOptions;
   protected _bot: TelegramBot;
   protected _api: ChatGPT;
+  protected _cbQuery: ((query: CallbackQuery) => Promise<void>) | null;
 
   constructor(bot: TelegramBot, api: ChatGPT, botOpts: BotOptions, debug = 1) {
     this.debug = debug;
     this._bot = bot;
     this._api = api;
     this._opts = botOpts;
+    this._cbQuery = null;
+
+    this._bot.on('callback_query', async (callbackQuery) => {
+      if (this._cbQuery) {
+        await this._cbQuery(callbackQuery);
+        this._cbQuery = null;
+      }
+    });
   }
 
   handle = async (
@@ -101,27 +112,28 @@ class CommandHandler {
             ],
           },
         };
-        this._bot.sendMessage(
+        const confirmMsg = await this._bot.sendMessage(
           msg.chat.id,
           '请选择您想要使用的 AI 引擎：',
           options
-        ).then(() => {
-          this._bot.on('callback_query', async (callbackQuery) => {
-            if (callbackQuery.data === 'chatgpt') {
-              await this._api.changeAPIType('official');
-              await this._bot.sendMessage(
-                msg.chat.id,
-                '已切换至 ChatGPT 引擎。'
-              );
-            } else if (callbackQuery.data === 'bing') {
-              await this._api.changeAPIType('bing');
-              await this._bot.sendMessage(
-                msg.chat.id,
-                '已切换至 Bing AI 引擎。'
-              );
-            }
-          });
-        });
+        );
+        this._cbQuery = async (callbackQuery) => {
+          if (callbackQuery.data === 'chatgpt') {
+            await this._api.changeAPIType('official');
+            await this._bot.editMessageText('🎉 已切换至 ***ChatGPT*** 引擎。', {
+              chat_id: msg.chat.id,
+              message_id: confirmMsg.message_id,
+              parse_mode: 'MarkdownV2',
+            });
+          } else if (callbackQuery.data === 'bing') {
+            await this._api.changeAPIType('bing');
+            await this._bot.editMessageText('🎉 已切换至 ***Bing AI*** 引擎。', {
+              chat_id: msg.chat.id,
+              message_id: confirmMsg.message_id,
+              parse_mode: 'MarkdownV2',
+            });
+          }
+        };
         break;
       case '/summary':
         const today = new Date();
