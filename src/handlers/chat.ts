@@ -107,7 +107,9 @@ class ChatHandler {
             throt_fun()
           }
         )
-        await this._editMessage(reply, resText, true, (res as BingResponse).details?.sourceAttributions);
+        if (res) {
+          await this._editMessage(reply, resText, true, (res as BingResponse).details?.sourceAttributions);
+        }
       } else {
         res = await this._api.sendMessage(
           text,
@@ -132,7 +134,9 @@ class ChatHandler {
       }
       
       // 这里的代码还需要完善来保证 tts 服务不正常时不会影响 bot 的其它功能，暂时先注释掉 tts 功能。
-      // await this.sendVoice(chatId, resText);
+      // if (resText && resText.length > 0) {
+      //   await this.sendVoice(chatId, resText);
+      // }
   
       if (this.debug >= 1) logWithTime(`📨 Response:\n${resText}`);
     } catch (err) {
