@@ -20,15 +20,6 @@ import {
 } from './types';
 import {logWithTime} from './utils';
 import { KeyvFile } from 'keyv-file';
-
-interface ChatContext {
-  jailbreakConversationId?: string;
-  conversationId?: string;
-  parentMessageId?: string;
-  conversationSignature?: string;
-  clientId?: string;
-  invocationId?: number;
-}
 import {DB} from './db';
 
 const MAX_MESSAGES_PER_CONVERSATION = -1;
@@ -138,6 +129,7 @@ class ChatGPT {
       parentMessageId: contextDB?.parentMessageId,
       jailbreakConversationId: contextDB?.jailbreakConversationId ?? true,
     };
+    console.log('jbid', context.jailbreakConversationId);
 
     let res: ChatResponseV3 | ChatResponseV4 | BingResponse;
     if (this.apiType == 'official') {
@@ -189,7 +181,6 @@ class ChatGPT {
         parentMessageId = (res as ChatResponseV4).id;
         break;
     }
-
     await this._db.updateContext(chatId, {
       conversationId: res.conversationId,
       parentMessageId,
