@@ -105,6 +105,7 @@ function loadConfig(): Config {
       userIds: tryGet<number[]>('bot.userIds') || [],
       groupIds: tryGet<number[]>('bot.groupIds') || [],
       chatCmd: tryGet<string>('bot.chatCmd') || '/chat',
+      queue: config.get<boolean>('bot.queue') ?? true,
     },
     database: {
       supabaseUrl: config.get<string>('database.supabaseUrl'),

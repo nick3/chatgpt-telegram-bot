@@ -8,11 +8,12 @@ import { processDailyChatRecords } from './handlers/tasks';
 
 async function main() {
   const opts = loadConfig();
+  const db = new DB();
 
   const db = new DB(opts.database);
 
   // Initialize ChatGPT API.
-  const api = new ChatGPT(opts.api);
+  const api = new ChatGPT(opts.api, db);
   await api.init();
 
   // Initialize Telegram Bot and message handler.
@@ -23,7 +24,7 @@ async function main() {
   });
   
   const botUsername = (await bot.getMe()).username;
-  const messageHandler = new MessageHandler(db, bot, api, opts.bot, opts.debug);
+  const messageHandler = new MessageHandler(bot, api, opts.bot, db, opts.debug);
   await messageHandler.init();
 
   bot.on('message', messageHandler.handle);

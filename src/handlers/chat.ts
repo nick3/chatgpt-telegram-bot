@@ -24,14 +24,22 @@ class ChatHandler {
   protected _apiRequestsQueue = new Queue(1, Infinity);
   protected _positionInQueue: Record<string, number> = {};
   protected _updatePositionQueue = new Queue(20, Infinity);
+  protected _db: DB;
 
-  constructor(bot: TelegramBot, api: ChatGPT, botOpts: BotOptions, debug = 1) {
+  constructor(
+    bot: TelegramBot,
+    api: ChatGPT,
+    botOpts: BotOptions,
+    db: DB,
+    debug = 1
+  ) {
     this.debug = debug;
     this._bot = bot;
     this._api = api;
     this._opts = botOpts;
     this._tts = new MsEdgeTTS();
     this._tts.setMetadata("zh-CN-XiaoxiaoNeural", OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+    this._db = db;
   }
 
   handle = async (db: DB | null, msg: TelegramBot.Message, text: string, isMentioned: boolean, botUsername: string) => {
@@ -52,29 +60,38 @@ class ChatHandler {
   
     if (msg.chat.type === 'private' || ((msg.chat.type === 'group' || msg.chat.type === 'supergroup') && (isMentioned || isReplyToBot))) {
       // Send a message to the chat acknowledging receipt of their message
-      const reply = await this._bot.sendMessage(chatId, '⌛', {
-        reply_to_message_id: msg.message_id,
-      });
-
-      // add to sequence queue due to chatGPT processes only one request at a time
-      const requestPromise = this._apiRequestsQueue.add(() => {
-        return this._sendToGpt(text, chatId, reply);
-      });
-      if (this._n_pending == 0) this._n_pending++;
-      else this._n_queued++;
-      this._positionInQueue[this._getQueueKey(chatId, reply.message_id)] =
-        this._n_queued;
-
-      await this._bot.editMessageText(
-        this._n_queued > 0 ? `⌛: 您现在排在第${this._n_queued}位，稍安勿躁哦~` : '🤔',
+      const reply = await this._bot.sendMessage(
+        chatId,
+        this._opts.queue ? '⌛' : '🤔',
         {
-          chat_id: chatId,
-          message_id: reply.message_id,
+          reply_to_message_id: msg.message_id,
         }
       );
-      const resText = await requestPromise;
-      const { message_id, from } = reply;
-      await db?.addChatRecord(chatId.toString(), `${from?.id}`, from?.username, from?.first_name, from?.last_name, resText, message_id.toString(), MessageType.REPLY, msg.chat.type !== 'private');
+
+      if (!this._opts.queue) {
+        await this._sendToGpt(text, chatId, reply);
+      } else {
+        // add to sequence queue due to chatGPT processes only one request at a time
+        const requestPromise = this._apiRequestsQueue.add(() => {
+          return this._sendToGpt(text, chatId, reply);
+        });
+        if (this._n_pending == 0) this._n_pending++;
+        else this._n_queued++;
+        this._positionInQueue[this._getQueueKey(chatId, reply.message_id)] =
+          this._n_queued;
+
+        await this._bot.editMessageText(
+          this._n_queued > 0 ? `⌛: 您现在排在第${this._n_queued}位，稍安勿躁哦~` : '🤔',
+          {
+            chat_id: chatId,
+            message_id: reply.message_id,
+          }
+        );
+        const resText = await requestPromise;
+        const { message_id, from } = reply;
+        await db?.addChatRecord(chatId.toString(), `${from?.id}`, from?.username, from?.first_name, from?.last_name, resText, message_id.toString(), MessageType.REPLY, msg.chat.type !== 'private');
+        await requestPromise;
+      }
     }
   };
 
@@ -102,6 +119,7 @@ class ChatHandler {
         );
         res = await this._api.sendMessage(
           text,
+          chatId,
           (token) => {
             resText += token;
             throt_fun()
@@ -112,13 +130,15 @@ class ChatHandler {
         }
       } else {
         res = await this._api.sendMessage(
-          text,
-          _.throttle(
-            async (partialResponse: ChatResponseV3 | ChatResponseV4) => {
-              const resText =
-                apiType === 'browser'
-                  ? (partialResponse as ChatResponseV3).response
-                  : (partialResponse as ChatResponseV4).text;
+        text,
+        chatId,
+        _.throttle(
+          async (partialResponse: ChatResponseV3 | ChatResponseV4) => {
+            const apiType = this._api.getApiType();
+            const resText =
+              apiType == 'browser'
+                ? (partialResponse as ChatResponseV3).response
+                : (partialResponse as ChatResponseV4).text;
               reply = await this._editMessage(reply, resText);
               await this._bot.sendChatAction(chatId, 'typing');
             },
@@ -141,6 +161,7 @@ class ChatHandler {
       if (this.debug >= 1) logWithTime(`📨 Response:\n${resText}`);
     } catch (err) {
       logWithTime('⛔️ ChatGPT API error:', (err as Error).message);
+      await this._db.clearContext(chatId);
       this._bot.sendMessage(
         chatId,
         "⚠️ 抱歉，我无法连接到服务器，请稍后再试。"

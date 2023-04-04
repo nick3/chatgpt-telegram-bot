@@ -60,7 +60,7 @@ class CommandHandler {
 
       case '/reset':
         await this._bot.sendChatAction(msg.chat.id, 'typing');
-        await this._api.resetThread();
+        await this._api.resetThread(msg.chat.id);
         await this._bot.sendMessage(
           msg.chat.id,
           '🔄 聊天线程已重置。新的聊天线程已开始。'

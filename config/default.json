@@ -4,7 +4,8 @@
     "token": "TELEGRAM_BOT_TOKEN",
     "groupIds": [],
     "userIds": [],
-    "chatCmd": "/chat"
+    "chatCmd": "/chat",
+    "queue": true
   },
   "database": {
     "supabaseUrl": "localhost",
