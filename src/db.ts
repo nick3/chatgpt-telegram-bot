@@ -1,12 +1,26 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import type { DBOptions } from './types';
 import { MessageType } from './handlers/message';
+import {open, RootDatabase} from 'lmdb';
+import {logWithTime} from './utils';
 
-// 创建一个数据库，用来存储当天的聊天记录和用户名
+interface ContextObject {
+  conversationId?: string;
+  parentMessageId?: string;
+  jailbreakConversationId?: string;
+}
+
+type Context = ContextObject | undefined;
+
 class DB {
+  protected _db: RootDatabase;
   protected supabase: SupabaseClient;
 
   constructor(dbConfig: DBOptions) {
+    this._db = open({
+      path: 'database',
+      compression: true,
+    });
     this.supabase = createClient(dbConfig.supabaseUrl, dbConfig.supabaseKey);
   }
 
@@ -129,6 +143,34 @@ class DB {
     }
     return result;
   }
+
+  getContext = (chatId: number): Promise<Context> => {
+    if (this._db) {
+      return this._db.get(chatId);
+    } else {
+      logWithTime('DB is not initialised!');
+      return Promise.reject(undefined);
+    }
+  };
+  updateContext = async (
+    chatId: number,
+    newContext: Pick<ContextObject, 'conversationId'> &
+      Required<Pick<ContextObject, 'parentMessageId'>> &
+      Pick<ContextObject, 'jailbreakConversationId'>
+  ) => {
+    if (this._db) {
+      await this._db.put(chatId, newContext);
+    } else {
+      logWithTime('DB is not initialised!');
+    }
+  };
+  clearContext = async (chatId: number) => {
+    if (this._db) {
+      await this._db.remove(chatId);
+    } else {
+      logWithTime('DB is not initialised!');
+    }
+  };
 }
 
 export {DB};

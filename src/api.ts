@@ -20,15 +20,7 @@ import {
 } from './types';
 import {logWithTime} from './utils';
 import { KeyvFile } from 'keyv-file';
-
-interface ChatContext {
-  jailbreakConversationId?: string;
-  conversationId?: string;
-  parentMessageId?: string;
-  conversationSignature?: string;
-  clientId?: string;
-  invocationId?: number;
-}
+import {DB} from './db';
 
 const MAX_MESSAGES_PER_CONVERSATION = -1;
 
@@ -46,7 +38,6 @@ class ChatGPT {
   protected _apiBrowser: ChatGPTAPIBrowser | undefined;
   protected _apiOfficial: ChatGPTAPI | undefined;
   protected _apiUnofficialProxy: ChatGPTUnofficialProxyAPI | undefined;
-  protected _context: ChatContext = {};
   protected _timeoutMs: number | undefined;
   protected _bingAIClients: Record<string, {
     client: BingAIClient,
@@ -58,12 +49,15 @@ class ChatGPT {
       namespace: string;
     }
   }> = {};
+  protected _db: DB;
 
-  constructor(apiOpts: APIOptions, debug = 1) {
+  constructor(apiOpts: APIOptions, db: DB, debug = 1) {
     this.debug = debug;
     this.apiType = apiOpts.type;
     this._opts = apiOpts;
     this._timeoutMs = undefined;
+    this._bingAIClients = {};
+    this._db = db;
   }
 
   init = async () => {
@@ -91,10 +85,6 @@ class ChatGPT {
       this._timeoutMs = this._opts.unofficial?.timeoutMs;
     } else if (this._opts.type == 'bing') {
       this._bingAIClients = {};
-      this._api = new BingAIClient({
-        ...(this._opts.bing as APIBingOptions),
-        cache: this._cacheOptions,
-       });
       this._timeoutMs = this._opts.browser?.timeoutMs;
     } else {
       throw new RangeError('Invalid API type');
@@ -139,17 +129,26 @@ class ChatGPT {
   };
   
   sendMessage = async (
-    chatId: number,
     text: string,
+    chatId: number,
     onProgress?: (res: ChatResponseV3 | ChatResponseV4 | BingResponse) => void
   ) => {
     if (this._opts.type !== 'bing' && !this._api) return;
+
+    const contextDB = await this._db.getContext(chatId);
+
+    const context = {
+      conversationId: contextDB?.conversationId,
+      parentMessageId: contextDB?.parentMessageId,
+      jailbreakConversationId: contextDB?.jailbreakConversationId ?? true,
+    };
+    console.log('jbid', context.jailbreakConversationId);
 
     let res: ChatResponseV3 | ChatResponseV4 | BingResponse;
     if (this.apiType == 'official') {
       if (!this._apiOfficial) return;
       res = await this._apiOfficial.sendMessage(text, {
-        ...this._context,
+        ...context,
         onProgress,
         timeoutMs: this._timeoutMs,
       });
@@ -162,8 +161,7 @@ class ChatGPT {
       }
       try {
         res = await this._api.sendMessage(text, {
-          jailbreakConversationId: true,
-          ...this._context,
+          ...context,
           toneStyle: 'creative',
           onProgress,
         });
@@ -183,7 +181,7 @@ class ChatGPT {
     } else {
       if (!this._api) return;
       res = await this._api.sendMessage(text, {
-        ...this._context,
+        ...context,
         onProgress,
         timeoutMs: this._timeoutMs,
       });
@@ -201,31 +199,27 @@ class ChatGPT {
         parentMessageId = (res as ChatResponseV4).id;
         break;
     }
-    
-    this._context = {
-      jailbreakConversationId: (res as BingResponse).jailbreakConversationId as string,
+    await this._db.updateContext(chatId, {
       conversationId: res.conversationId,
-      parentMessageId: parentMessageId,
-      // conversationSignature: (res as BingResponse).conversationSignature,
-      // clientId: (res as BingResponse).clientId,
-      // invocationId: (res as BingResponse).invocationId,
-    };
+      parentMessageId,
+      jailbreakConversationId: (res as BingResponse).jailbreakConversationId as string ?? true,
+    });
 
     return res;
   };
 
   startNewBingConversation = async (chatId: number) => {
-    await this.resetThread();
+    await this.resetThread(chatId);
     if (this._opts.type == 'bing') {
       this._bingAIClients[`${chatId}`]?.client.conversationsCache.clear();
     }
   };
   
-  resetThread = async () => {
+  resetThread = async (chatId: number) => {
     if (this._apiBrowser) {
       await this._apiBrowser.resetThread();
     }
-    this._context = {};
+    await this._db.clearContext(chatId);
   };
 
   refreshSession = async () => {
