@@ -153,7 +153,6 @@ class ChatGPT {
         timeoutMs: this._timeoutMs,
       });
     } else if (this.apiType == 'bing') {
-      console.log('this._bingAIClients',this._bingAIClients, this._bingAIClients[`${chatId}`])
       if (this._bingAIClients[`${chatId}`]) {
         this._api = this._bingAIClients[`${chatId}`]?.client;
       } else {
