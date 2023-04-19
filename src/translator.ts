@@ -19,11 +19,12 @@ const {api: apiConfig} = config;
 export const translate = async (text: string) => {
   const chat = new ChatOpenAI({
     modelName: 'gpt-3.5-turbo',
+    temperature: 0.3,
     openAIApiKey: apiConfig.official?.apiKey,
   });
   const chatPrompt = ChatPromptTemplate.fromPromptMessages([
     SystemMessagePromptTemplate.fromTemplate(
-      '你是一个资深的语言翻译者，精通各种语言。你要翻译所有发给你的语句，请翻译时不要带翻译腔，而是要翻译得自然、流畅和地道，可以使用网络用语。若发给你的语句为中文，你需要将其翻译为英文。若发你的语句为其它的语言，你需要将其翻译为中文。不要对翻译的内容进行解释。'
+      '你是一个翻译高手，懂得用自然、流畅和地道的语言来翻译。如果收到中文，就用美式英文回答。如果收到其他语言，就用简体中文回答。不要解释翻译的内容，只要翻译就行。尽量使用与翻译后语言一致的网上流行词和表达方式，让对方觉得你很懂他们的文化和习惯。'
     ),
     HumanMessagePromptTemplate.fromTemplate('{text}'),
   ]);
