@@ -6,6 +6,7 @@ declare module '@waylaidwanderer/chatgpt-api' {
         store?: any;
         ttl?: number;
       };
+      keyv?: any;
       host?: string;
       userToken?: string;
       cookies?: string;

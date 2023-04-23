@@ -19,6 +19,7 @@ import {
   APIUnofficialOptions,
 } from './types';
 import {logWithTime} from './utils';
+import Keyv from 'keyv';
 import { KeyvFile } from 'keyv-file';
 import {DB} from './db';
 
@@ -41,13 +42,7 @@ class ChatGPT {
   protected _timeoutMs: number | undefined;
   protected _bingAIClients: Record<string, {
     client: BingAIClient,
-    cacheOptions: {
-      store: KeyvFile<{
-        key: string;
-        value: any;
-      }>;
-      namespace: string;
-    }
+    keyv: Keyv
   }> = {};
   protected _db: DB;
 
@@ -117,13 +112,15 @@ class ChatGPT {
       }),
       namespace: `bing-${chatId}`,
     };
+    const keyv = new Keyv(cacheOptions);
+    console.log('keyv', keyv);
     const client = new BingAIClient({
       ...(this._opts.bing as APIBingOptions),
-      cache: cacheOptions,
+      keyv,
     });
     this._bingAIClients[`${chatId}`] = {
       client,
-      cacheOptions,
+      keyv,
     };
     return client;
   };
