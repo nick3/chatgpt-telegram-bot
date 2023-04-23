@@ -91,8 +91,10 @@ class ChatHandler {
         const { message_id, from } = reply;
         await db?.addChatRecord(chatId.toString(), `${from?.id}`, from?.username, from?.first_name, from?.last_name, resText, message_id.toString(), MessageType.REPLY, msg.chat.type !== 'private');
         await requestPromise;
+        return resText;
       }
     }
+    return null;
   };
 
   protected _sendToGpt = async (

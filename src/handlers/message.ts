@@ -51,7 +51,7 @@ class MessageHandler {
     let message = text;
     if (isCommand) {
       msgType = MessageType.COMMAND;
-      message = command ?? '';
+      message = `${command} ${text}`;
     }
     if (msg.chat.type === 'private') {
       const {id, username, first_name, last_name} = msg.from ?? {};
@@ -71,11 +71,13 @@ class MessageHandler {
 
     // Parse message.
     const {text, command, isMentioned} = this._parseMessage(msg);
+
+    let reply;
     
     if (command != '' && command != this._opts.chatCmd) {
       this.recordMessage(msg, text, true, command);
       // For commands except `${chatCmd}`, pass the request to commandHandler.
-      await this._commandHandler.handle(
+      reply = await this._commandHandler.handle(
         this._db,
         msg,
         command,
@@ -83,13 +85,16 @@ class MessageHandler {
         this._botUsername,
         this._chatHandler
       );
+      if (reply) {
+        this.recordMessage(reply, reply.text ?? '', true, '');
+      }
     } else {
       this.recordMessage(msg, text, false);
       // Handles:
       // - direct messages in private chats
       // - replied messages in both private chats and group chats
       // - messages that start with `chatCmd` in private chats and group chats
-      await this._chatHandler.handle(this._db, msg, text, isMentioned, this._botUsername);
+      reply = await this._chatHandler.handle(this._db, msg, text, isMentioned, this._botUsername);
     }
   };
 

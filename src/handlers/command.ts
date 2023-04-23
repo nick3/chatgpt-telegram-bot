@@ -39,6 +39,7 @@ class CommandHandler {
     botUsername: string,
     chatHandler: ChatHandler
   ) => {
+    let res;
     const userInfo = `@${msg.from?.username ?? ''} (${msg.from?.id})`;
     const chatInfo =
       msg.chat.type == 'private'
@@ -157,7 +158,7 @@ class CommandHandler {
         const text = msg.text?.replace('/trans', '')?.trim();
         if (text && text.length > 0) {
           const result = await translate(text);
-          await this._bot.sendMessage(
+          res = await this._bot.sendMessage(
             msg.chat.id,
             result
           );
@@ -175,6 +176,7 @@ class CommandHandler {
         );
         break;
     }
+    return res;
   };
 }
 
