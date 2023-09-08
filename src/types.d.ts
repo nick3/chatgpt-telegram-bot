@@ -47,13 +47,13 @@ export interface APIUnofficialOptions {
 
 export interface APIBingOptions {
   host?: string;
-  userToken: string;
+  userToken?: string;
   cookies?: string;
   proxy?: string;
 }
 
 export interface APIOptions {
-  type: 'browser' | 'official' | 'unofficial' | 'bing';
+  type: 'browser' | 'official' | 'unofficial' | 'motohead' | 'bing';
   browser?: APIBrowserOptions;
   official?: APIOfficialOptions;
   unofficial?: APIUnofficialOptions;
