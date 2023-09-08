@@ -93,7 +93,7 @@ function loadConfig(): Config {
   
   apiBingCfg = {
     host: tryGet<string>('api.bing.host') || undefined,
-    userToken: config.get<string>('api.bing.userToken'),
+    userToken: tryGet<string>('api.bing.userToken') || undefined,
     cookies: tryGet<string>('api.bing.cookies') || undefined,
     proxy: tryGet<string>('api.bing.proxy') || undefined,
   };

@@ -6,10 +6,10 @@ dependencies:
     version: 2.12.1
   '@waylaidwanderer/chatgpt-api':
     specifier: github:nick3/node-chatgpt-api
-    version: github.com/nick3/node-chatgpt-api/d7147c46ed1b385ee436ebb31ca7afb924960ad5
+    version: github.com/nick3/node-chatgpt-api/b3ffe3b6cf3eb509d22b43239c519c5e52c29787
   chatgpt:
-    specifier: ^5.1.4
-    version: 5.2.2
+    specifier: ^5.2.5
+    version: 5.2.5
   config:
     specifier: ^3.3.9
     version: 3.3.9
@@ -141,10 +141,6 @@ packages:
       '@babel/helper-validator-identifier': 7.19.1
       chalk: 2.4.2
       js-tokens: 4.0.0
-    dev: false
-
-  /@dqbd/tiktoken@1.0.2:
-    resolution: {integrity: sha512-AjGTBRWsMoVmVeN55NLyupyM8TNamOUBl6tj5t/leLDVup3CFGO9tVagNL1jf3GyZLkWZSTmYVbPQ/M2LEcNzw==}
     dev: false
 
   /@dqbd/tiktoken@1.0.6:
@@ -459,6 +455,13 @@ packages:
       - supports-color
     dev: false
 
+  /@timefox/bic-sydney@1.1.4:
+    resolution: {integrity: sha512-ONeS0weT+ZoE471TDdzPqkKRk+VFr7sEL5+qEq1nIur6XMuVZ8cvlBicUNHfhYKIavkOM8xmBnk2dfVFQ54aiQ==}
+    dependencies:
+      fetch-undici: 3.0.1
+      undici: 5.22.1
+    dev: false
+
   /@types/caseless@0.12.2:
     resolution: {integrity: sha512-6ckxMjBBD8URvjB6J3NcnuAn5Pkl7t3TizAg+xdlzzQGSPSmBcXf8KoIH0ua/i+tio+ZRUHEXp0HEmvaR4kt0w==}
     dev: true
@@ -738,6 +741,15 @@ packages:
       - supports-color
     dev: false
 
+  /agent-base@7.1.0:
+    resolution: {integrity: sha512-o/zjMZRhJxny7OyEF+Op8X+efiELC7k7yOjMzgfzVqOzXqkBkWI79YoTdOtsuWd5BWhAGAuOY/Xa6xpiaWXiNg==}
+    engines: {node: '>= 14'}
+    dependencies:
+      debug: 4.3.4
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
   /aggregate-error@3.1.0:
     resolution: {integrity: sha512-4I7Td01quW/RpocfNayFdFVk1qSuoh0E7JrbRJ16nH01HhKFQ88INq9Sd+nd72zqRySlr9BmDA8xlEJ6vJMrYA==}
     engines: {node: '>=8'}
@@ -991,7 +1003,7 @@ packages:
     dependencies:
       ansi-align: 3.0.1
       camelcase: 7.0.1
-      chalk: 5.2.0
+      chalk: 5.3.0
       cli-boxes: 3.0.0
       string-width: 5.1.2
       type-fest: 2.19.0
@@ -1098,6 +1110,12 @@ packages:
   /chalk@5.2.0:
     resolution: {integrity: sha512-ree3Gqw/nazQAPuJJEy+avdl7QfZMcUvmHIKgEZkGL+xOBzRvup5Hxo6LHuMceSxOabuJLJm5Yp/92R9eMmMvA==}
     engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
+    dev: true
+
+  /chalk@5.3.0:
+    resolution: {integrity: sha512-dLitG79d+GV1Nb/VYcCDFivJeK1hiukt9QjRNVOsUtTy1rR1YJsmpGGTZ3qJos+uw7WmWF4wUwBd9jxjocFC2w==}
+    engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
+    dev: false
 
   /character-entities-legacy@1.1.4:
     resolution: {integrity: sha512-3Xnr+7ZFS1uxeiUDvV02wQ+QDbc55o97tIV5zHScSPJpcLm/r0DFPcoY3tYRp+VZukxuMeKgXYmsXQHO05zQeA==}
@@ -1148,15 +1166,15 @@ packages:
     dev: false
     optional: true
 
-  /chatgpt@5.2.2:
-    resolution: {integrity: sha512-6HVueHj7ghJtcsBHi8CfXCC5fbCXJMc29NSGluTcg/2yLo0Jla3Wm/dlcz3cIb+7KVBKD5b6Qz5bVu8XFEF7Sg==}
+  /chatgpt@5.2.5:
+    resolution: {integrity: sha512-DNhBzPb2zTDjJADY44XfngMvsvrvHRq1md2VPXLmnKeP1UCeA1B6pV3s9ZRwlcgjVT0RyM77fRj1xj5V11Vctg==}
     engines: {node: '>=14'}
     hasBin: true
     dependencies:
-      '@dqbd/tiktoken': 1.0.2
       cac: 6.7.14
       conf: 11.0.1
       eventsource-parser: 1.0.0
+      js-tiktoken: 1.0.7
       keyv: 4.5.2
       p-timeout: 6.1.1
       quick-lru: 6.1.1
@@ -1201,8 +1219,8 @@ packages:
       restore-cursor: 4.0.0
     dev: false
 
-  /cli-spinners@2.7.0:
-    resolution: {integrity: sha512-qu3pN8Y3qHNgE2AFweciB1IfMnmZ/fsNTEE+NOFjmGB2F/7rLhnhzppvpCnN4FovtP26k8lHyy9ptEbNwWFLzw==}
+  /cli-spinners@2.9.0:
+    resolution: {integrity: sha512-4/aL9X3Wh0yiMQlE+eeRhWP6vclO3QRtw1JHKIT0FFUs5FjpFmESqtMvYZ0+lbzBw900b95mS0hohy+qn2VK/g==}
     engines: {node: '>=6'}
     dev: false
 
@@ -1525,6 +1543,10 @@ packages:
     dependencies:
       jsbn: 0.1.1
       safer-buffer: 2.1.2
+    dev: false
+
+  /emoji-regex@10.2.1:
+    resolution: {integrity: sha512-97g6QgOk8zlDRdgq1WxwgTMgEWGVAQvB5Fdpgc1MkNy56la5SKP9GsMXKDOdqwn90/41a8yPwIGk1Y6WVbeMQA==}
     dev: false
 
   /emoji-regex@8.0.0:
@@ -2008,7 +2030,7 @@ packages:
     resolution: {integrity: sha512-UHHu1HqW22ZhK6C/1Zmjf7mQpOwPwLYZ+xcsOgpzistONU8QqvCop6Od29p/kw1GUVoq2Ihu6ItpKLtlojx4FQ==}
     engines: {node: '>=16'}
     dependencies:
-      undici: 5.21.0
+      undici: 5.22.1
     dev: false
 
   /figures@5.0.0:
@@ -2405,6 +2427,16 @@ packages:
       - supports-color
     dev: false
 
+  /https-proxy-agent@7.0.0:
+    resolution: {integrity: sha512-0euwPCRyAPSgGdzD1IVN9nJYHtBhJwb6XPfbpQcYbPCwrBidX6GzxmchnaF4sfF/jPb74Ojx5g4yTg3sixlyPw==}
+    engines: {node: '>= 14'}
+    dependencies:
+      agent-base: 7.1.0
+      debug: 4.3.4
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
   /human-signals@2.1.0:
     resolution: {integrity: sha512-B4FFZ6q/T2jhhksgkbEW3HBvWIfDW85snkQgawt07S7J5QXTk6BkNV+0yAeZrM5QpMAdYlocGoljn0sJ/WQkFw==}
     engines: {node: '>=10.17.0'}
@@ -2482,7 +2514,7 @@ packages:
     engines: {node: '>=14.18.0'}
     dependencies:
       ansi-escapes: 6.1.0
-      chalk: 5.2.0
+      chalk: 5.3.0
       cli-cursor: 4.0.0
       cli-width: 4.0.0
       external-editor: 3.1.0
@@ -2493,7 +2525,7 @@ packages:
       run-async: 2.4.1
       rxjs: 7.8.0
       string-width: 5.1.2
-      strip-ansi: 7.0.1
+      strip-ansi: 7.1.0
       through: 2.3.8
       wrap-ansi: 8.1.0
     dev: false
@@ -2775,6 +2807,12 @@ packages:
   /js-sdsl@4.3.0:
     resolution: {integrity: sha512-mifzlm2+5nZ+lEcLJMoBK0/IH/bDg8XnJfd/Wq6IP+xoCjLZsTOnV2QpxlVbX9bMnkl5PdEjNtBJ9Cj1NjifhQ==}
     dev: true
+
+  /js-tiktoken@1.0.7:
+    resolution: {integrity: sha512-biba8u/clw7iesNEWLOLwrNGoBP2lA+hTaBLs/D45pJdUPFXyxD6nhcDVtADChghv4GgyAiMKYMiRx7x6h7Biw==}
+    dependencies:
+      base64-js: 1.5.1
+    dev: false
 
   /js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -3125,7 +3163,7 @@ packages:
     resolution: {integrity: sha512-l0x2DvrW294C9uDCoQe1VSU4gf529FkSZ6leBl4TiqZH/e+0R7hSfHQBNut2mNygDgHwvYHfFLn6Oxb3VWj2rA==}
     engines: {node: '>=12'}
     dependencies:
-      chalk: 5.2.0
+      chalk: 5.3.0
       is-unicode-supported: 1.3.0
     dev: false
 
@@ -3912,15 +3950,30 @@ packages:
     resolution: {integrity: sha512-c1qb/1rdE+EFDYiLXh10VY459uMh7DN9zlgd8mZJLoeiPpYllN8eAOiih2Rkah5ywxRm5tHN5C9zPheDq8d1MA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     dependencies:
-      chalk: 5.2.0
+      chalk: 5.3.0
       cli-cursor: 4.0.0
-      cli-spinners: 2.7.0
+      cli-spinners: 2.9.0
       is-interactive: 2.0.0
       is-unicode-supported: 1.3.0
       log-symbols: 5.1.0
       stdin-discarder: 0.1.0
-      strip-ansi: 7.0.1
+      strip-ansi: 7.1.0
       wcwidth: 1.0.1
+    dev: false
+
+  /ora@7.0.1:
+    resolution: {integrity: sha512-0TUxTiFJWv+JnjWm4o9yvuskpEJLXTcng8MJuKd+SzAzp2o+OP3HWqNhB4OdJRt1Vsd9/mR0oyaEYlOnL7XIRw==}
+    engines: {node: '>=16'}
+    dependencies:
+      chalk: 5.3.0
+      cli-cursor: 4.0.0
+      cli-spinners: 2.9.0
+      is-interactive: 2.0.0
+      is-unicode-supported: 1.3.0
+      log-symbols: 5.1.0
+      stdin-discarder: 0.1.0
+      string-width: 6.1.0
+      strip-ansi: 7.1.0
     dev: false
 
   /ordered-binary@1.4.0:
@@ -4861,6 +4914,15 @@ packages:
       emoji-regex: 9.2.2
       strip-ansi: 7.0.1
 
+  /string-width@6.1.0:
+    resolution: {integrity: sha512-k01swCJAgQmuADB0YIc+7TuatfNvTBVOoaUWJjTB9R4VJzR5vNWzf5t42ESVZFPS8xTySF7CAdV4t/aaIm3UnQ==}
+    engines: {node: '>=16'}
+    dependencies:
+      eastasianwidth: 0.2.0
+      emoji-regex: 10.2.1
+      strip-ansi: 7.1.0
+    dev: false
+
   /string.prototype.trim@1.2.7:
     resolution: {integrity: sha512-p6TmeT1T3411M8Cgg9wBTMRtY2q9+PNy9EV1i2lIXUN/btt763oIfxwN3RR8VU6wHX8j/1CFy0L+YuThm6bgOg==}
     engines: {node: '>= 0.4'}
@@ -4909,6 +4971,13 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       ansi-regex: 6.0.1
+
+  /strip-ansi@7.1.0:
+    resolution: {integrity: sha512-iq6eVVI64nQQTRYq2KtEg2d2uU7LElhTJwsH4YzIHZshxlgZms/wIc4VoDQTlG/IvVIrBKG06CrZnp0qv7hkcQ==}
+    engines: {node: '>=12'}
+    dependencies:
+      ansi-regex: 6.0.1
+    dev: false
 
   /strip-final-newline@2.0.0:
     resolution: {integrity: sha512-BrpvfNAE3dcvq7ll3xVumzjKjZQ5tI1sEUIKr3Uoks0XUl45St3FlatVqef9prk4jRDzhW6WZg+3bk93y6pLjA==}
@@ -5174,9 +5243,9 @@ packages:
       through: 2.3.8
     dev: false
 
-  /undici@5.21.0:
-    resolution: {integrity: sha512-HOjK8l6a57b2ZGXOcUsI5NLfoTrfmbOl90ixJDl0AEFG4wgHNDQxtZy15/ZQp7HhjkpaGlp/eneMgtsu1dIlUA==}
-    engines: {node: '>=12.18'}
+  /undici@5.22.1:
+    resolution: {integrity: sha512-Ji2IJhFXZY0x/0tVBXeQwgPlLWw13GVzpsWPQ3rV50IFMMof2I55PZZxtm4P6iNq+L5znYN9nSTAq0ZyE6lSJw==}
+    engines: {node: '>=14.0'}
     dependencies:
       busboy: 1.6.0
     dev: false
@@ -5480,7 +5549,7 @@ packages:
     dependencies:
       ansi-styles: 6.2.1
       string-width: 5.1.2
-      strip-ansi: 7.0.1
+      strip-ansi: 7.1.0
     dev: false
 
   /wrappy@1.0.2:
@@ -5571,14 +5640,15 @@ packages:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
     dev: false
 
-  github.com/nick3/node-chatgpt-api/d7147c46ed1b385ee436ebb31ca7afb924960ad5:
-    resolution: {tarball: https://codeload.github.com/nick3/node-chatgpt-api/tar.gz/d7147c46ed1b385ee436ebb31ca7afb924960ad5}
+  github.com/nick3/node-chatgpt-api/b3ffe3b6cf3eb509d22b43239c519c5e52c29787:
+    resolution: {tarball: https://codeload.github.com/nick3/node-chatgpt-api/tar.gz/b3ffe3b6cf3eb509d22b43239c519c5e52c29787}
     name: '@waylaidwanderer/chatgpt-api'
-    version: 1.35.0
+    version: 1.37.3
     hasBin: true
     dependencies:
       '@dqbd/tiktoken': 1.0.6
       '@fastify/cors': 8.2.1
+      '@timefox/bic-sydney': 1.1.4
       '@waylaidwanderer/fastify-sse-v2': 3.1.0(fastify@4.15.0)
       '@waylaidwanderer/fetch-event-source': 3.0.1
       boxen: 7.0.2
@@ -5586,13 +5656,13 @@ packages:
       dotenv: 16.0.3
       fastify: 4.15.0
       fetch-undici: 3.0.1
-      https-proxy-agent: 5.0.1
+      https-proxy-agent: 7.0.0
       inquirer: 9.1.5
       inquirer-autocomplete-prompt: 3.0.0(inquirer@9.1.5)
       keyv: 4.5.2
       keyv-file: 0.2.0
-      ora: 6.2.0
-      undici: 5.21.0
+      ora: 7.0.1
+      undici: 5.22.1
       ws: 8.13.0
     transitivePeerDependencies:
       - bufferutil
